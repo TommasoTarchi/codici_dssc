@@ -1,0 +1,250 @@
+---
+title: "lab2"
+author: "tommaso tarchi"
+date: "2022-10-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### CLT
+
+We compute the probability that Posillipo win the match, by using the Skellam distribution:
+```{r}
+library(skellam)
+lambda <- 5   # parameters of the Poisson distributions
+mu <- 7
+
+PWin_P_sk <- pskellam(0, lambda, mu, lower.tail = FALSE)
+PWin_P_sk
+```
+
+We now use the normal approximation for Poisson distributions, using the fact that a Poisson with rate $\lambda$ can be approximated by a normal with mean and variance both equal to $\lambda$:
+```{r}
+lambda <- 5
+mu <- 7
+
+# we call z the variable x-y (with x scores by Posillipo and y scores by the other team)
+# the two values below are normal approximations
+mean.z <- lambda - mu
+sd.z <- sqrt(lambda + mu)
+
+PWin_P_n <- pnorm(0, mean.z, sd.z, lower.tail = FALSE)
+PWin_P_n
+```
+```{r}
+# using continuity correction
+PWin_P_n_cor <- pnorm(0.5, mean.z, sd.z, lower.tail = FALSE)
+PWin_P_n_cor
+```
+```{r}
+# plotting
+plot(function(x) dnorm(x, mean.z, sd.z), xlim = c(-15, 25), ylim = c(0, 0.3))
+points(0:25, dpois(0:25, lambda), col = "blue")
+points(0:25, dpois(0:25, mu), col = "red")
+points(-15:25, dskellam(-15:25, lambda, mu), col = "green")
+```
+
+### Distribution of the sample mean and variance
+
+We perform a simulation with R samples of size n:
+```{r}
+set.seed(1234)
+R <- 1000
+n <- 30
+
+# generate the sample of size n (from the distribution aforementioned) R times 
+samples <- array(NA, c(3, R, n))
+for (i in 1:R) {
+  samples[1, i, ] <- rnorm(n, 0, 1)
+  samples[2, i, ] <- rt(n, df = 3)
+  samples[3, i, ] <- runif(n, 0, 1)
+}
+
+# compute the sample mean and the sample variance
+# (apply() la funzione sulle righe (parametro=1) o sulle colonne (par=2) della matrice data)
+samples_stat <- array(NA, c(3, 2, R))
+for (i in 1:3) {
+  samples_stat[i, 1, ] <- apply(samples[i, , ], 1, mean)
+  samples_stat[i, 2, ] <- apply(samples[i, , ], 1, var)
+}
+
+# visualize the results
+par (mfrow=c(1,3))
+
+hist(samples_stat[1, 1, ], nclass = 30, probability = TRUE, 
+     xlab="y", main= "N(0,1)", cex.main = 1.5)
+curve(dnorm(x, 0, sqrt(1/n)), add = TRUE, col = "red", lwd = 2)
+
+hist(samples_stat[2, 1, ], nclass = 30, probability = TRUE, 
+     xlab = "y", main = expression(t[3]), cex.main = 1.5)
+curve(dnorm(x, 0, sqrt(  (3/((3 - 2) * n)))), add = TRUE, col = "red", lwd = 2)
+
+hist(samples_stat[3, 1, ], nclass = 30, probability = TRUE, 
+     xlab = "y", main = "U(0,1)", cex.main = 1.5)
+curve(dnorm(x, 1/2, sqrt(1/(12 * n))), add = TRUE, col = "red", lwd = 2)
+```
+
+It is known that the sample variance $S^2$ of the mean of a normal distribution is distributed proportionally to a $\chi^2$ distribution with $n-1$ degrees of freedom
+$$
+\frac{(n-1)S^2}{\sigma^2} \sim \chi^2_{n-1}
+$$
+```{r}
+# visualizing the sample variance for standard normal distrbution
+par (mfrow=c(1,1))
+sigma <- 1 
+hist(samples_stat[1, 2, ], nclass = 30, probability = TRUE, 
+     xlab=expression(s^2), main = "", cex.main = 1.5)
+curve(((n - 1)/sigma^2) * dchisq(x * ((n - 1)/sigma^2), df = n - 1),
+      add = TRUE, col = "red", lwd = 2)
+```
+
+### biased and unbiased estimators for the variance
+
+We could also define a biased estimator for the variance
+$$
+S_b := \frac{1}{n} \sum_{i=1}^{n}\left(x_i-\mu\right)^2
+$$
+We now confront biased and unbiased estimators for the variance of a normal distribution:
+```{r}
+set.seed(2)
+R <- 1000
+n <- 10
+mu <- 0  # real expectation value
+sigma <- 1  # real standard deviation
+
+s2 <- rep(NA, R)  # for unbiased estimator
+s2_b <- rep(NA, R)  # for biased estimator
+
+# (la funzione var() usa l'unbiased estimator)
+for ( i in 1 :R ) {
+  y <- rnorm(n, mu, sigma)
+  s2[i] <- var(y) 
+  s2_b[i] <- var(y)*(n-1)/n
+}
+
+s2_mean <- mean(s2)
+s2_b_mean <- mean(s2_b)
+
+# plotting
+# (in red the true mean, in blue the estimated mean)
+par(mfrow=c(1,2), oma=c(0,0,0,0))
+hist(s2, breaks = 50, xlab = expression(s^2), probability = TRUE,
+     main = expression(s^2), cex.main = 1.5)
+abline(v = sigma^2, col = "red", lwd = 2)
+abline(v = s2_mean, col = "blue", lwd = 2, lty = 2) 
+
+hist(s2_b, breaks = 50, xlab = expression(s[b]^2), probability = TRUE,
+     main = expression(s[b]^2), cex.main = 1.5)
+abline(v = sigma^2, col = "red", lwd = 2)
+abline(v = s2_b_mean, col = "blue", lwd = 2, lty = 2) 
+```
+
+### mean estimators for normal distribution
+
+In addition to sample mean and median we can define for a normal distribution the following mean estimators:
+
+1) semi-sum of minimum an maximum:
+$$
+ssum(x) := \frac{max(x)+min(x)}{2}
+$$
+2) the 10% trimmed sample mean: sample mean computed discarding 10% upper and 10% lower data
+
+In the following we will call $\hat\mu_1$ the sample mean, $\hat\mu_2$ the sample median, $\hat\mu_3$ the semi-sum of the extremes and $\hat\mu_4$ the trimmed sample mean.
+```{r}
+R <- 1000
+n <- 10
+mu <- 2
+sigma <- 2
+
+est <- matrix(0, R, 4)
+means.means <- rep(NA, 4)   # mean values of estimators
+
+set.seed(1234)
+for (i in 1:R) {
+ x <- rnorm(n, mu, sigma)
+ est[i, 1] <- mean(x)
+ est[i, 2] <- median(x)
+ est[i, 3] <- (min(x) + max(x))/2
+ est[i, 4] <- mean(x, trim = 0.1)
+}
+
+means.means <- apply(est, 2, mean)
+
+par(mfrow = c(1, 1), xaxt = "n")
+boxplot(est, main="Comparison between four estimators")
+par(xaxt = "s")
+axis(1, 1:4, c(expression(hat(mu)[1]), expression(hat(mu)[2]), expression(hat(mu)[3]), expression(hat(mu)[4])) )
+abline(h = mu, lwd = 2, col = "blue")
+```
+We now compute the bias:
+```{r}
+bias <- apply(est, 2, mean) - mu
+bias
+```
+```{r}
+variance <- apply(est, 2, var)
+variance
+```
+All the estimators appear unbiased and the sample mean register the lowest estimated sample variance, which is a good approximation of $σ_2/n=0.4$.
+
+To check the consistency of the estimators we have to increase the size of the samples:
+```{r}
+n2 <- 200
+
+est2 <- matrix(0, R, 4)
+
+set.seed(1234)
+for (i in 1:R) {
+ x <- rnorm(n2, mu, sigma)
+ est2[i, 1] <- mean(x)
+ est2[i, 2] <- median(x)
+ est2[i, 3] <- (min(x) + max(x))/2
+ est2[i, 4] <- mean(x, trim = 0.1)
+}
+
+means.means2 <- apply(est2, 2, mean)
+```
+```{r}
+# confronting sample means
+par(mfrow = c(1, 2))
+hist(est[, 1], probability = TRUE, main = "n=10")
+abline(v = mu, col = "red", lwd = 2)
+abline(v = means.means[1], col = "blue", lwd = 2, lty = 2)
+hist(est2[, 1], probability = TRUE, xlim = c(0, 4), main = "n=200")
+abline(v = mu, col = "red", lwd = 2)
+abline(v = means.means2[1], col = "blue", lwd = 2, lty = 2)
+```
+```{r}
+# confronting sample medians
+par(mfrow = c(1, 2))
+hist(est[, 2], probability = TRUE, main = "n=10")
+abline(v = mu, col = "red", lwd = 2)
+abline(v = means.means[2], col = "blue", lwd = 2, lty = 2)
+hist(est2[, 2], probability = TRUE, xlim = c(-1, 5), main = "n=200")
+abline(v = mu, col = "red", lwd = 2)
+abline(v = means.means2[2], col = "blue", lwd = 2, lty = 2)
+```
+```{r}
+# confronting semisum of the extremes
+par(mfrow = c(1, 2))
+hist(est[, 3], probability = TRUE, main = "n=10")
+abline(v = mu, col = "red", lwd = 2)
+abline(v = means.means[3], col = "blue", lwd = 2, lty = 2)
+hist(est2[, 3], probability = TRUE, xlim = c(-1, 5), main = "n=200")
+abline(v = mu, col = "red", lwd = 2)
+abline(v = means.means2[3], col = "blue", lwd = 2, lty = 2) 
+```
+```{r}
+# confronting 10% trimmed mean
+par(mfrow = c(1, 2))
+hist(est[, 4], probability = TRUE, main = "n=10")
+abline(v = mu, col = "red", lwd = 2)
+abline(v = means.means[4], col = "blue", lwd = 2, lty = 2) 
+hist(est2[, 4], probability = TRUE, xlim = c(0, 4), main = "n=200")
+abline(v = mu, col = "red", lwd = 2)
+abline(v = means.means2[4], col = "blue", lwd = 2, lty = 2) 
+```
+All of the four estimators seem to be consistent, since their variance lowers as the samples get larger.

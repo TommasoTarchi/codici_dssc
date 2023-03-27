@@ -1,0 +1,393 @@
+---
+title: "GroupF_HM3"
+author: "E. Malcapi, M. Pronestì, S. Brusatin, T. Tarchi"
+output:
+  html_document:
+    toc: yes
+    toc_depth: '3'
+    df_print: paged
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+    df_print: paged
+date: "2022-12-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## FSDS - Chapter 4
+
+### Ex 4.24
+
+*Refer to the vegetarian survey result in Exercise 4.6, with * $n$ *= 25 and no vegetarians.*\
+$(a)$ *Find the Bayesian estimate of* $\pi$ *using a beta prior distribution with* $\alpha = \beta$ *equal:* $(i)$ *0.5,* $(ii)$ *1.0,* $(iii)$ *10.0.*\
+*Explain how the choice of prior distribution affects the posterior mean estimate.* \
+$(b)$ *If you were planning how to take a larger survey from the same population, explain how you can use the posterior results of the previous survey with* $n$ *= 25 based on the prior with* $\alpha = \beta = 1$ *to form the prior distribution to use with the new survey results.*
+
+**Solution**
+
+(a) According to Bayes' theorem, $\pi(p |x) \propto \pi(p)L(p)$. Since we are dealing with a proportion, it is reasonable to assume a Binomial likelihood, $L(p) \propto p^x(1-p)^{n-x}$, and a Beta distribution as prior distribution, since its support is $[0,1]$. \
+Therefore, 
+$$
+\pi(p |x) \propto \pi(p)L(p) \propto p^x(1-p)^{n-x}p^{\alpha -1}(1-p)^{\beta -1} \\
+\propto p^{\alpha + x -1 }(1-p)^{\beta + n -x -1}           
+$$
+This implies that the posterior distribution is still a Beta distribution with parameters $\alpha + x$ and $\beta +n-x$.
+$$
+\pi(p|x)= \frac{\Gamma(\alpha + \beta +n)}{\Gamma(\alpha+x)\Gamma(\beta+n-x)}p^{\alpha + x - 1}(1-p)^{\beta +n -x-1}
+$$
+In order to obtain the Bayesian estimate of $\pi$, i.e., the proportion of vegetarian people in the population, we can use the mean of the posterior distribution which is equal to 
+$$
+E(P|x)=\frac{\alpha + x}{\alpha + \beta + n}= \frac{\alpha + \beta}{\alpha + \beta + n}E_{\pi}(P) \ + \ \frac{n}{\alpha + \beta + n} \hat{p}_{ML}
+$$ 
+In our case, $n=25$ and $x=0$, so
+
+*i)* if $\alpha=\beta=0.5$, i.e., we are considering the Jeffreys' prior distribution, 
+$$
+E(P|x)=\frac{0.5 + 0}{0.5 + 0.5 + 25}= 0.019
+$$
+*ii)* if $\alpha=\beta=1$, i.e., we are considering a Uniform prior distribution, 
+$$
+E(P|x)=\frac{1 + 0}{1 + 1 + 25}= 0.037
+$$
+*iii)* if $\alpha=\beta=10$, 
+$$
+E(P|x)=\frac{10 + 0}{10 + 10 + 25}= 0.222
+$$
+It is clear that the higher the parameters of the prior Beta distribution, the higher the mean of the posterior distribution. This implies that our estimate for the population proportion will grow as the parameters of the prior distribution increase. 
+
+(b) In case we are planning to take a larger sample, we can use the posterior distribution (computed using $\alpha=\beta=1$) obtained in the survey involving just 25 people as prior distribution in the new survey. This means that the prior distribution for the new survey will be a Beta distribution with $\alpha=1$ and $\beta=26$.
+
+### Ex 4.26
+
+*Refer to the clinical trial example in Section 4.7.5. Using the Jeffreys' prior for* $\pi_1$ *and for* $\pi_2$*, simulate and plot the posterior distribution of* $\pi_1 -\pi_2$*. Find the HPD interval. What does that interval reflect about the posterior distribution?*
+
+**Solution**
+
+In this exercise we are considering two data coming from two independent binomial distributions with parameters namely $B(\pi_1 ,n_1)$ and $B(\pi_2,n_2)$. Under this conditions we can consider the Jeffreys' prior distribution (the prior distribution that lead to a posterior distribution which remains constant under different scales of measurement for the parameter of interest) as a Beta distribution with $\alpha=\beta=0.5$ for both $\pi_1$ and $\pi_2$. This lead us to the following posterior distributions 
+$$
+\begin{align*}
+g(\pi_1|y_1)\propto f(y_1|\pi_1)p(\pi_1)\propto [\pi_1^{y_1}\left(1-\pi_1\right)^{n_1-y_1}][\pi_1^{\alpha-1}\left(1-\pi_1\right)^{\beta-1}]\propto Beta(\pi_1;\alpha^*,\beta^*)\\
+g(\pi_2|y_2)\propto f(y_2|\pi_2)p(\pi_2)\propto [\pi_2^{y_2}\left(1-\pi_2\right)^{n_2-y_2}][\pi_2^{\alpha-1}\left(1-\pi_2\right)^{\beta-1}]\propto Beta(\pi_2;\alpha^*,\beta^*)\\
+\end{align*}
+$$
+This means that the posterior distribution for both the parameters is a Beta distribution with $\alpha^*=y_i+0.5$ and $\beta^*=n_i-y_i+0.5$. Since in our example we have all successes out of 11 trials and 0 successes out of 1 trial we have $\pi_1|y_1\sim Beta(11.5,0.5)$ and $\pi_2|y_2\sim Beta(0.5,1.5)$. We can then create a sample of 1000000 elements from these two distributions: 
+```{r}
+N=1000000
+alpha_p=c(11.5,0.5)
+beta_p=c(0.5,1.5)
+sample_1=rbeta(N,alpha_p[1],beta_p[1])
+sample_2=rbeta(N,alpha_p[2],beta_p[2])
+```
+Now we can evaluate the difference from the two samples and print its distribution and histogram: 
+```{r}
+par(mfrow=c(1,2),mai=c(1,1,1,1))
+hist(sample_1-sample_2)
+plot(density(sample_1-sample_2,),main="density of sample_1-sample_2")
+```
+
+As we can see from the simulation, the posterior distribution of $\pi_1-\pi_2$ is monotone and increasing  
+between $[-1,1]$ which is the domain of $\pi_1-\pi_2$. 
+
+We can now evaluate both the posterior quantile interval and the high density posterior interval (using the *HDInterval library* ):
+
+```{r}
+library(HDInterval)
+EQT=c(quantile(sample_1-sample_2,probs = 0.025),quantile(sample_1-sample_2,probs = 0.975))
+HDI=hdi(sample_1-sample_2,credMass = 0.95)
+HDI
+EQT
+```
+
+As we can see the HDI shifts the boundaries more to the right and this is due to the fact that the posterior density is monotone increasing towards the upper bound.
+
+Since the density function is monotone then it's preferable not to exclude values closer to 1 and so it's preferable to use the HDI interval.
+
+### Ex 4.62
+
+_For the bootstrap method, explain the similarity and difference between the true sampling distribution of $\hat{\theta}$ and the empirically-generated bootstrap distribution in terms of its center and its spread._
+
+**Solution**
+
+The bootstrap method treats the sampling distribution as if it were the true population distribution. The method samples $n$ observations from the sample distribution. This new sample has its own estimation of the parameter $\theta$. Repeating the process $N$ times we have $N$ estimates of $\theta$: $\hat{\theta}_1, \dots, \hat{\theta}_N$. Their empirical distribution is called the _bootstrap distribution_.  
+The difference with the true sampling distribution is that the bootstrap distribution centers around $\hat{\theta}$ instead of $\theta$, also the interval of values between the 2.5 and the 97.5 percentiles of the estimates of $\theta$ is a 95% confidence interval for $\theta$.
+
+```{r}
+# example
+
+# parameters
+mu = 5
+sigma = 1
+
+# sample
+n = 30
+y = rnorm(n,mu,sigma)
+
+# bootstrap
+N = 1000
+boot.sample = matrix(NA, nrow = N, ncol = n)
+for(i in 1:N)
+{
+  boot.sample[i,] = sample(y,n,replace = TRUE)
+}
+boot.stat = rowMeans(boot.sample)
+
+hist(boot.stat, main='',breaks=20, probability = TRUE, sub = paste("the true mean is",mu))
+```
+
+## FSDS - Chapter 6
+
+### Ex. 6.10
+
+*The Students data file shows responses on variables summarized in Exercise 1.2.*
+
+*(a) Fit the linear model using hsgpa = high school GPA, tv = weekly hours watching TV, and sport = weekly hours participating in sports as predictors of cogpa = college GPA. Report the prediction equation. What do the P-values suggest?*
+
+*(b) Summarize the estimated effect of hsgpa.*
+
+*(c) Report and interpret $R^2$ , adjusted $R^2$ , and the multiple correlation.*
+
+**Solution**
+
+a)
+```{r}
+setwd(getwd())
+data <- read.table("Students.dat", header = T)
+
+fit = lm(cogpa~hsgpa+tv+sport, data = data)
+summary(fit)
+```
+The relatively high p-values we got both in the t-tests and in the F-test suggest that the relation between the variables is not linear.
+
+b) However, we can notice that the p-value obtained for the hsgpa t-test is an order of magnitude smaller than the others. We can therefore think of a linear relationship between hsgpa and cogpa.
+```{r}
+fit = lm(cogpa~hsgpa, data = data)
+summary(fit)
+```
+As expected, we can observe that both the t-test on the coefficient of hsgpa and the F-test are now below the threshold of 0.05. We can conclude that there is a linear relationship (even if not very strong) between the two variables cogpa and hsgpa.
+
+c) In the first report we can see that the value of $R^2$ is pretty low, confirming the poor quality of the fit. The value of the adjusted $R^2$ is even lower: that is because this last index is thought to compensate the fact that more complex models (namely models with more variables) tend to give greater values of $R^2$. In fact we can observe that in the second fit the value of $R^2$ becomes smaller, while the adjusted one gets larger.
+
+### Ex 6.30
+
+*When the values of* $y$ *are multiplied by a constant* $c$*, from their formulas, show that* $s_y$ *and* $\hat{\beta_1}$ *in the bivariate linear model are also then multiplied by* $c$*. Thus, show that* $r = \hat{\beta_1}(s_x/s_y)$ *does not depend on the units of measurement.*
+
+**Solution**
+
+For a response variable Y, the sample standard deviation $s_y$ and the least square estimate of the slope of the associated bilinear model $\hat{\beta_1}$ are given by the following formulas
+$$
+s_y= \sqrt{\frac{\sum_{i=1}^n (y_i - \bar{y})^2}{n-1}} \ \ \ \ \ \ \ \ \ \ \hat{\beta_1}=\frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2}
+$$
+Given a constant $c$, consider a new response variable $Y^*=cY$, whose sample mean is $\overline{y^*}=c\overline{y}$. Then
+
+$$
+s_{y^*}=\sqrt{\frac{\sum_{i=1}^n (y_i^* - \bar{y^*})^2}{n-1}} = 
+\sqrt{\frac{\sum_{i=1}^n (cy_i - c\bar{y})^2}{n-1}}=
+\sqrt{c^2 \frac {\sum_{i=1}^n(y_i - \bar{y})^2}{n-1}}= 
+c \ \sqrt{\frac{\sum_{i=1}^n (y_i - \bar{y})^2}{n-1}} = c s_y
+$$
+and 
+$$
+\hat{\beta^*_1}=\frac{\sum_{i=1}^n (x_i - \bar{x})(y_i^* - \bar{y^*})}{\sum_{i=1}^n (x_i - \bar{x})^2}=
+\frac{\sum_{i=1}^n (x_i - \bar{x})(cy_i - c\bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2}=
+c \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2} = c \hat{\beta_1}
+$$
+
+In order to show that the correlation coefficient $r$ is unit-free, we need to rewrite it as a function of two standardized variables, $Z_x$ and $Z_y$ which do not depend on any measurement unit by definition. Recall that $Z_x=\frac{X - \mu_x}{\sigma_x}$, with $\mu_z=0$ and $\sigma_z=1$, and the corresponding sample estimate is $z_x=\frac{x-\bar{x}}{s_x}$.
+
+$$
+r= \hat{\beta^*_1}\left(\frac{s_x}{s_{y^*}}\right)= 
+c \hat{\beta_1} \left(\frac{s_x}{cs_{y}}\right) = 
+\hat{\beta_1} \left(\frac{s_x}{s_{y}}\right) = 
+\frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2} \frac{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}{\sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}}=
+$$
+
+
+
+
+
+$$
+=\frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}\sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}} =
+\sum_{i=1}^n \left(\frac{x_i - \bar{x}}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}\right)\left(\frac{y_i - \bar{y}}{\sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}}\right)=
+$$
+
+$$
+=\frac{1}{n-1}\sum_{i=1}^n \left(\frac{x_i - \bar{x}}{s_x}\right)\left(\frac{y_i - \bar{y}}{s_y}\right)=
+$$ 
+
+
+$$ 
+=\frac{1}{n-1}\sum_{i=1}^n z_xz_y
+$$
+
+### Ex 6.42
+
+*You can fit the quadratic equation* $E(Y) = \beta_0+\beta_1 \cdot x+\beta_2 \cdot x^2$ *by fitting a multiple regression model with* $x_1 = x$ *and* $x_2 = x^2$*.* \
+$(a)$ *Simulate* $100$ *independent observations from the model* $Y = 40.0-5.0 \cdot x+0.5\cdot x^2+\epsilon$*, where* $X$ *has a uniform distribution over* $\left[0, 10\right]$ *and* $\epsilon \sim \mathcal{N}(0,1)$*. Plot the data and fit the quadratic model. Report how the fitted equation compares with the true relationship.* \
+$(b)$ *Find the correlation between* $x$ *and* $y$ *and explain why it is so weak even though the plot shows a strong relationship with a large* $R^2$ *value for the quadratic model.*
+
+**Solution**
+
+a) Let's first create our sample: 
+```{r}
+#Number of observations
+n=100
+#Creating the sample with the uniform distribution between 0 and 10 
+x=runif(n,min = 0,max=10)
+x_2=x^2
+#Creating the stochastic component of the model from a standard normal distribution
+e=rnorm(n)
+#Evaluating y from the observations 
+y=40.0-x*5.0+x_2*0.5+e
+#Creating a datframe with our simulated observations 
+d=data.frame(x,x_2,y)
+```
+
+Now we can fit the linear model to our data: 
+```{r}
+lmodel=lm(y~x+x_2,data=d)
+summary(lmodel)
+```
+As we can see the F-statistic and the t statistic for each parameter have all very small p-values $(\sim10^{-6})$ confirming the general significance of the model and the significance of the variables in the model. 
+
+We can also analize the residuals with the following plots: 
+```{r}
+par(mfrow=c(2,2))
+plot(x,lmodel$residuals,ylab = "residual")
+abline(h=0, lty="dashed",col="red")
+plot(x_2,lmodel$residuals,ylab = "residual")
+abline(h=0, lty="dashed",col="red")
+plot(lmodel$fitted.values,lmodel$residuals,xlab = "fitted value",ylab = "residual")
+abline(h=0, lty="dashed",col="red")
+qqnorm(lmodel$residuals)
+abline(coef = c(0,1), lty="dashed",col="red")
+```
+
+From these plots we can affirm that the residual are independent from the variables and from the predicted value as they are scattered at random around 0. In addition we can also say that they follow a normal distribution as we expected since we have generated the stocastich part from a normal distribution $N(0,1)$.
+
+At the end we can also plot the data and the model prediction and see how they overlap: 
+```{r}
+#prediction 
+pred=function (x){
+  p=lmodel$coefficients[1]+lmodel$coefficients[2]*x+lmodel$coefficients[3]*x^2
+}
+#Plots
+par(mfrow=c(1,1))
+plot(x,y)
+curve(pred(x),col="red",add=T)
+```
+
+b) In order to evaluate the correlation between x and y we can use the correlation index 
+$$
+r=\frac{s_{x,y}}{s_xs_y}=\frac{\sum_{i=1}^n(x_i-\bar{x})(y_i-\bar{y})}{\sqrt{[\sum_{i=1}^n(x_i-\bar{x})^2][\sum_{i=1}^n](y_i-\bar{y})^2]}}
+$$
+This index has a value between -1 and 1 and when $|r|=1$ it means that the two variables are totally *linearly* correlated. Therfore this index is a measue of linear correlation but since here y and x are not linearly correlated we expect that $|r|<1$. Instead if we take into consideration the adjusted $R^2$ index of the model, it represent how the model can represent the variability of the y and since our model is not linear in x we expect that $R^2>|r|$.
+
+We can now evaluate these indexes for our data and model: 
+```{r}
+summary(lmodel)
+#Sample standard errors 
+sx=sqrt(var(x))
+sy=sqrt(var(y))
+#Sample covariance
+sxy=cov(x,y)
+#Index of correlation 
+r=sxy/(sx*sy)
+abs(r)
+```
+As expected we can see that $|r|<R^2$.
+
+### Ex 6.52
+
+_$F$ statistics have alternate expressions in terms of $R^2$ values._  
+
+- _(a) Show that for testing $H_0: \beta_1 = \dots = \beta_p = 0$,_  
+$$F = \frac{(TSS-SSE)/p}{SSE/[n-(p+1)]} \textit{ is equivalently } \frac{R^2/p}{(1-R^2)/[n-(p+1)]}$$  
+_Explain why larger values of $R^2$ yield larger values of $F$._  
+
+- _(b) Show that for comparing nested linear models,_
+$$ F = \frac{(SSE_0-SSE_1)/(p_1-p_0)}{SSE_1/[n-(p_1+1)]} = \frac{(R_1^2 - R_0^2)/(p_1-p_0)}{(1-R_1^2)/[n-(p_1+1)]}$$
+
+**Solution**
+
+- _(a)_
+Recall that $TSS = \sum_{i=1}^n (y_i - \bar{y})^2 = SSR + SSE$ where $SSE = \sum_{i=1}^n (y_i - \hat{y})^2$ and $SSR = \sum_{i=1}^n (\hat{y}_i - \bar{y})^2$. And $$R^2 = \frac{SSR}{TSS} = \frac{TSS-SSE}{TSS} = \frac{\sum_{i=1}^n (y_i - \bar{y})^2 - \sum_{i=1}^n (y_i - \hat{y})^2}{\sum_{i=1}^n (y_i - \bar{y})^2}$$
+So we can write
+$$
+\frac{R^2/p}{(1-R^2)/[n-(p+1)]}
+=
+\frac{\frac{TSS-SSE}{TSS}/p}{(1-\frac{TSS-SSE}{TSS})/[n-(p+1)]}
+$$
+$$
+=
+\frac{\frac{TSS-SSE}{TSS}/p}{\frac{TSS-SSE-TSS}{TSS}/[n-(p+1)]}
+=
+\frac{(TSS-SSE)/p}{SSE/[n-(p+1)]}
+= F
+$$
+Next, $F=F(R^2)$ is positively monotone, since
+$$
+\frac{d}{dR^2} F
+=
+\frac{d}{dR^2} \frac{R^2/p}{(1-R^2)/[n-(p+1)]}
+=
+\frac{p}{n-(p+1)} \frac{d}{dR^2} \frac{R^2}{1-R^2}
+=
+\frac{p}{n-(p+1)} \frac{1}{(1-R^2)^2}
+\geq 0
+$$
+
+- _(b)_
+As above
+$$
+\frac{(R_1^2 - R_0^2)/(p_1-p_0)}{(1-R_1^2)/[n-(p_1+1)]}
+=
+\frac{\left( \frac{TSS_1-SSE_1}{TSS_1} - \frac{TSS_0-SSE_0}{TSS_0} \right) / (p_1-p_0)}{\left( 1-\frac{TSS_1-SSE_1}{TSS_1} \right)/[n-(p_1+1)]}
+=
+\frac{\left( \frac{SSE_0 TSS_1 - SSE_1 TSS_0}{TSS_0 TSS_1} \right)/(p_1-p_0)}{\left( \frac{TSS_1 - TSS_1 + SSE_1}{TSS_1} \right)/[n-(p_1+1)]}
+$$
+And, since the total sum on squares doesn't depend on $p$, $TSS_0=TSS_1=TSS$, it follows
+$$
+\frac{(R_1^2 - R_0^2)/(p_1-p_0)}{(1-R_1^2)/[n-(p_1+1)]}
+=
+\frac{\left( \frac{TSS(SSE_0-SSE_1)}{TSS^2} \right)/(p_1-p_0)}{\left( \frac{SSE_1}{TSS} \right)/[n-(p_1+1)]}
+=
+\frac{(SSE_0-SSE_1)/(p_1-p_0)}{SSE_1/[n-(p_1+1)]}
+= F
+$$
+
+## LAB
+
+*Suppose you receive $n=15$ phone calls in a day, and you want to build a model to assess their average length. Your likelihood for each call length is $y_i\sim Exponential\left(\lambda\right)$. Now, you have to choose the prior $\pi\left(\lambda\right)$. Please, tell which of these priors is adequate to describe the problem, and provide a short motivation for each of them:*
+
+*1. $\pi\left(\lambda\right) = Beta\left(4,2\right)$;*
+
+*2. $\pi\left(\lambda\right) = Normal\left(1,2\right)$;*
+
+*3. $\pi\left(\lambda\right) = Gamma\left(4,2\right)$;*
+
+*Now, compute your posterior as $\pi\left(\lambda|y\right)\propto L\left(\lambda;y\right)\pi\left(\lambda\right)$ for the selected prior. If your first choice was correct, you will be able to compute it analytically.*
+
+**Solution**
+
+First we plot the three distributions:
+```{r}
+curve(dbeta(x, 4, 2))
+```
+```{r}
+curve(dnorm(x, 1, 2), xlim = c(-9, 10))
+```
+```{r}
+curve(dgamma(x, 4, 2), xlim = c(0, 5))
+```
+
+First of all we exclude the normal distribution, since it takes on also negative values. Then, supposed that I receive 15 calls in a day, it is likely that most of them are just quick calls to exchange few information, and just a small part of them result in a long conversation. Therefor a right-skewed distribution will better describe the situation, and the gamma will be the best choice.
+
+The likelihood is $\lambda^{15}e^{-15\bar{y}\lambda}$. We can then compute analytically the posterior, obtaining (neglecting the numeric constants):
+$$
+\pi\left(\lambda|y\right) \propto \lambda^{18}e^{-\left(2+15\bar{y}\right)\lambda},
+$$
+which is a gamma distribution with $\alpha=19$ and $\beta=2+15\bar{y}$.

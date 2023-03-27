@@ -1,0 +1,361 @@
+---
+title: 'Lab 2: tree on iris'
+output:
+  html_document:
+    df_print: paged
+---
+
+# Goal
+
+Given the `iris` dataset, find a ML-based way to tell which is the hardest variable to be predicted, given the other variables, and motivate the answer.
+
+### Hints
+
+The goal is not to "build a ML system on this data", but rather a question to be answered.
+So we should:
+
+0. understand the question (that probably includes giving an interpretation to "hardest")
+1. design a method for answering the question
+2. implement that method
+3. provide the answer by applying the method
+
+# Possible "solution"
+
+## Step 1: design
+
+The `iris` dataset is composed by 5 variables, hence the question may be answered by basically "trying to predict" each one of them and measuring how hard it is.
+If we intend to follow this path, we need:
+
+1. to be able to "try to predict"
+2. a way for measuring how hard it is
+
+Concerning 1, and noted that we can tackle the prediction problem as a supervised learning problem, we know a learning technique (officially just one) that fits the scenario: learning of decision/regression trees.
+Interestingly, 4 of the variables are numeric and 1 is categorical: fortunately, we have a variant of the learning technique for each of the two cases.
+
+Concerning 2, we note that the notion of hardness, as captured by the corresponding word in natural language, is broad. "Hard" could refer to computational effort, time needed to design a ML system for doing prediction, required knowledge, ...
+We decide to interpret "hard to be predicted" as "degree to which, on some data, a model learned with some suitable technique correctly predicts the dependent variable".
+In brief, we plan to interpret hardness as (in)effectiveness of prediction; we know several ways to measure (in)effectiveness. One is *error*. (I am being purposely vague here...).
+Note that, while in principle this "definition" is not bound to a specific dataset or to a specific learning technique, we have only one dataset an only one learning technique.
+
+In practice, hence, we are going to build 5 models (4 regression and 1 classification models), measure their errors, and *say that the hardest variable is the one for which the error is the largest*.
+Note that the last part (the one in italic), is a key step, even if it appears trivial and it does not require any big implementation effort.
+Recall that we want to "design a method for answering the question": when executed, the method is required to result in an answer.
+Without that step, the method execution would result in a collection of 5 numerical values, not in an answer!
+
+## Step 2: implementation
+
+The method designed above and described in natural language can be, in principle, applied to any dataset.
+Again in principle, we could implement as a function that takes a dataset (a dataframe, in terms of R), and outputs the name of the hardest variable.
+
+However, for simplicity we'll start by doing an implementation mixed with the execution.
+This is done also beacuse there are still some ambiguities in the description of the method (e.g., how to measure the error?) and we will discover and address them as we meet them.
+Ideally, one should first fully define the method (i.e., the corresponding algorithm), possibly in the form of a piece of pseudocode.
+
+### Simplicity: implementation + execution
+
+Load `iris`.
+```{r}
+d = iris
+```
+
+How can we learn a tree? Using a package!
+There are many packages that implement (slightly different versions of) the learning technique that we saw in the lectures.
+My choice is for the package `tree` (that you probably have to install, first, using `install.packages("tree")`).
+(Another option is `rpart`).
+```{r}
+require(tree)
+```
+
+#### Supervised learning conventions in R
+
+Most of the packages for supervised learning share the following structure.
+They have:
+
+- a function for doing the learning, usually with the name of the technique itself
+- a function for doing the prediction, usually named `predict()`
+`tree` adheres this "convention" (see the documentation).
+
+The learning function usually has two ways for being invoked: one in which $\{(x^{(i)},y^{(i)})\}_i$ is specified by giving $\{x^{(i)}\}_i$ and $\{y^{(i)}\}_i$ separately and explicitly, the other in which a dataframe (without indication of the dependent variable) is passed together with *an indication of the dependency*.
+(Actually `tree()` only supports the second way).
+The latter is done using a data type, peculiar of R, known as **formula**.
+The syntax for specifying a formula literal (i.e., a constant value for a data type) is `a ~ b+c` (this is an example, rather than a formal specification of the syntax): this value means `a` depends on `b` and `c`.
+A common case is that one wants to say that a variable depends on all the other variables: this can be done with `a ~ .`.
+
+Summarizing, for building a tree for predicting the Species based on the other variable on the full dataset `d`, we do:
+```{r}
+tree(Species ~ ., d)
+```
+Note that:
+
+- the formula is not quoted: it is not a string representing a dependency, it is a formula!
+- the outcome of the execution of the above command is the textual representation (on the standard output) of the learned tree [there might be an error here...]
+
+You should also note that there are more decorations, on that tree, than the ones we expected to see.
+Look at the documentation for more info.
+
+As an aside, a tree can also be plot:
+```{r}
+t = tree(Species~., d)
+plot(t)
+text(t)
+```
+`text()` is needed to add the labels to the tree.
+
+#### With the `rpart` package
+
+```{r}
+require(rpart)
+```
+```{r}
+rpart(Species~., d)
+```
+
+```{r}
+t = rpart(Species~., d)
+plot(t)
+text(t)
+```
+
+Le diverse dimensioni dei due alberi ottenuti con tree() e rpart() sono dovute al fatto che la tecnica del recursive binary splitting ha bisogno di un parametro per lo stop. Evidentemente nei due pacchetti il valore di default di questo parametro è diverso.
+
+### Back to design+implementation
+
+We know how to build a tree.
+How should we measure the *error*?
+We have some options:
+
+- on the learning data
+- with a static training/test division (e.g., 20% of the overall data used as test)
+- with a k-fold CV
+- with a **leave-one-out** CV (LOOCV), i.e., a k-fold CV with $k=n$, $n$ being the number of observations in the available data
+
+The easiest (in terms of effort to be realized) option is the 1st: but we know that, when $n_\text{min}=1$, the error on the learning data is 0 by definition.
+It would hence pointless to compare a set of 0s...
+We need to ascertain which is the default value of $n_\text{min}$ in `tree()`, that requires to consume the documentation: I leave this for your enjoyment.
+
+We go for the 2nd option.
+We use `sample()` for shuffling the set of row-indexes of `d` and take a subset of this set that will act as the indexes of the learning data.
+```{r}
+indexes.learning = sample(c(1:nrow(d)))[1:(nrow(d)*0.8)]
+```
+
+Now we can learn the tree (let's start with Species):
+```{r}
+t.species = tree(Species~., d[indexes.learning,])
+plot(t.species)
+text(t.species)
+```
+
+#### How to measure the error?
+
+The `predict()` function takes a dataframe with possibly new observations and predict the corresponding labels: the results is hence a vector.
+```{r}
+predicted.y = predict(t.species, d[-indexes.learning,], type="class")
+```
+Note that:
+
+- the `-` preceding `indexes.learning` means "select all but those"
+- `type="class"` is needed to obtain a vector of factors, rather than a more complex thing: see the documentation of `predict.tree()`
+- `predict()` doesn't cheat: even if `d[-indexes.learning,]` actually contains also the correct $y$ values, it is not using them
+
+Now we can compute the *classification error* rate by comparing `predicted.y` against the expected $y$:
+```{r}
+length(which(predicted.y!=d$Species[-indexes.learning]))/length(predicted.y)
+```
+Note that `which()` returns the indexes of a Boolean vector elements that are true.
+
+Another way is to "compute" the **confusion matrix** and then obtaining the error from that.
+The confusion matrix shows the number misclassifications, class by class:
+```{r}
+table(predicted.y, d$Species[-indexes.learning])
+```
+Given that matrix, the accuracy of classification is:
+```{r}
+conf.matrix = table(predicted.y, d$Species[-indexes.learning])
+sum(diag(conf.matrix))/sum(conf.matrix)
+```
+and the error rate can be computed as:
+```{r}
+error.species = 1-sum(diag(conf.matrix))/sum(conf.matrix)
+error.species
+```
+
+Esistono pacchetti appositi per il calcolo dell'errore.
+
+#### As a function
+
+Out of simplicity, we might build a function that does all those operations together, with some parameters:
+```{r}
+computeErrorRate = function(categorical.y.name, data, learner, p.learn = 0.8, ...) {
+  indexes.learning = sample(c(1:nrow(data)))[1:(nrow(data)*p.learn)]
+  model = learner(formula(paste0(categorical.y.name,"~.")), data[indexes.learning,], ...)
+  predicted.y = predict(model, d[-indexes.learning, ], type="class")
+  length(which(predicted.y!=d[-indexes.learning, categorical.y.name]))/length(predicted.y) 
+}
+```
+Note that:
+
+- `p.learn = 0.8` in the signature means that there is a default value for this parameter
+- `...` in the signature denotes "any other parameter", that can be then passed to other functions with `...` again
+- the return statement is implicit: the returned value is the last computed outcome just before the end
+- `learner` here is intended to assume functions as values (try with `tree` or `rpart`)
+
+```{r}
+print(computeErrorRate("Species", d, tree))
+print(computeErrorRate("Species", d, rpart))
+```
+Notare che i due errori hanno una componente randomica.
+
+A similar function could be made for doing k-fold CV or LOOCV.
+Do it by yourself.
+
+We can do nice things with such a function.
+For example, we can compute the error for different values of the learning-to-test data ratio (that 0.8 above):
+```{r,echo=F}
+require(tidyverse)
+```
+```{r}
+ratio = seq(0.1, 0.99, 0.05)
+error = ratio %>% map_dbl(function(r){computeErrorRate("Species", d, tree, r)})
+tibble(ratio=ratio, error=error) %>% ggplot(aes(x=ratio,y=error))+geom_line()+ylim(0,1)
+```
+
+#### For regression
+
+Now, let's do "the same" on the first numerical variable:
+```{r}
+names(d)
+```
+
+```{r}
+t.sl = tree(Sepal.Length~., d[indexes.learning,])
+predicted.y = predict(t.sl, d[-indexes.learning,], type="vector")
+predicted.y
+```
+
+Wait! Now the $y$ is numerical, we cannot just check for equality, we need to compute another metric instead of the classification error.
+We could go for the RSS, or the MAE, or the MSE...
+Let's go with the MAE (*mean absolute error*):
+```{r}
+error.sl = mean(abs(predicted.y-d$Sepal.Length[-indexes.learning]))
+error.sl
+```
+Errore assoluto nell'unità di misura di Sepal.Length.
+
+Again, we can write a function for doing everything:
+```{r}
+computeMAE = function(numerical.y.name, data, learner, p.learn = 0.8, ...) {
+  indexes.learning = sample(c(1:nrow(data)))[1:(nrow(data)*p.learn)]
+  model = learner(formula(paste0(numerical.y.name,"~.")), data[indexes.learning,], ...)
+  predicted.y = predict(model, d[-indexes.learning, ], type="vector")
+  mean(abs(predicted.y-d[-indexes.learning, numerical.y.name]))
+}
+```
+
+## Step 3: execution and answer
+
+Since we indeed built the functions, we can now compute the errors for all the variables:
+```{r}
+for (variable in names(d)) {
+  if (is.numeric(d[,variable])) {
+    error = computeMAE(variable, d, tree)
+  } else {
+    error = computeErrorRate(variable, d, tree)
+  }
+  cat(paste(variable, error, "\n"))
+}
+```
+
+Apparently, the largest error is obtained for Petal.Length, so it is the hardest variable to be predicted.
+
+But, wait!
+**Comparing an error rate (something that is, by definition, in $[0,1]$) against a MAE (that is, in general, unbounded), is pointless!**
+(As an example, try multiplying one of the numerical variable by 10 and see that the error will increase by 10 too!).
+This is intrinsically related to the nature of the $y$ in the two cases: categorical and numerical.
+It turns out, hence, that the idea of using "the effectiveness of a model learned with default parameter" as a proxy for the hardness (actually, the opposite of the effectiveness), is wrong.
+
+How can we overcome this limitation?
+
+## Alternative step 1: re-design
+
+Since the problem is that we cannot compare the absolute values of the error, one possibility is to consider the complexity a model exhibits for obtaining an error of 0.
+The rationale is that 0 is comparable with 0, since they both represent the absence of any error, regardless of the scale.
+We need hence a way for measuring the complexity: for trees, this is easy, since we can simply count the number of nodes.
+
+So summarizing, the new method for answering would be:
+
+1. for each variable
+    a. learn a tree that obtains a 0 error 
+    b. count the number of nodes of the tree
+2. say that the hardest variable is the one for which the count is the greatest
+
+Note that with the tree learning procedure that we know, one can obtain a tree with error 0 by simply setting $n_\text{min}$ (provided that the dataset $\{(x^{(i)},y^{(i)})\}_i$ does not contain different observations with the same $y$).
+
+## Alternative step 2: implementation
+
+We need to find out:
+
+- how to set the $n_\text{min}$ in `tree()`
+- how to count the number of nodes in a tree
+
+By digging the documentation of `tree()` we find that the parameters for the learning procedure are described in the documentation of the function `tree.control()`.
+It is said that:
+
+> To produce a tree that fits the data perfectly, set `mindev = 0` and `minsize = 2`, if the limit on tree depth allows such a tree.
+
+By reading further, we infer that `minsize` is related with $n_\text{min}$.
+
+Let's try.
+Normal tree (default flexibility, i.e., default value for `minsize`):
+```{r}
+t=tree(Species~., d)
+plot(t)
+text(t)
+```
+
+Complex tree:
+```{r}
+t=tree(Species~., d, mindev=0, minsize=2)
+plot(t)
+text(t)
+```
+Yes!
+It is larger, and also uglier...
+(As a consequence, it is less interpretable).
+
+Concerning the count of nodes, by reading the documentation of `tree()` in the Value section, we found that a "component" of the returned value, named `frame` is:
+
+> A data frame with a row for each node, and `row.names` giving the node numbers.
+
+So we just need to count the rows of that dataframe:
+```{r}
+nrow(tree(Species~., d)$frame)
+```
+
+It works: check with the corresponding image above.
+
+So let's write a function for doing everything:
+```{r}
+computeComplexityOfPerfectTree = function (y.name, data) {
+  t = tree(formula(paste0(y.name,"~.")), data, mindev=0, minsize=2)
+  nrow(t$frame)
+}
+computeComplexityOfPerfectTree("Species", d)
+```
+
+## Alternative step 3: execution and answer
+
+As before:
+Since we indeed built the functions, we can now compute the errors for all the variables:
+```{r}
+for (variable in names(d)) {
+  complexity = computeComplexityOfPerfectTree(variable, d)
+  cat(paste(variable, complexity, "\n"))
+}
+```
+
+So, according to this method, it turns out that the hardest variable is Sepal.Width, differently than with the previous method.
+
+Note that the important thing here is not the actual answer, but the full path to the answer.
+Note also that this method still has the drawback of comparing apples and oranges: indeed the complexity of the obtained trees clearly shows that the values are very different for the categorical and numerical variables.
+This is because the former just takes 3 values, while the latter ones take many of them: when we impose the RSS=0 as the only stopping criterion, all of them basically act as class values. It is hence somehow expected that much more nodes are needed to perfecly accomodate all those class values.

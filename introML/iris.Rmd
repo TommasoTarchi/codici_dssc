@@ -1,0 +1,15 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+compl <- cbind(names(iris), rep(NA, 5))
+
+for (i in 1:5) {
+  tree <- rpart(iris[, i]~., iris, )
+  compl[i, 2] <- length(tree$frame[[2]])
+}
+
+compl
+```

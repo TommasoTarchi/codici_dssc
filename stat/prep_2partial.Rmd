@@ -1,0 +1,214 @@
+---
+title: "Prep secondo parz"
+author: "tommaso tarchi"
+date: "2022-12-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Models
+
+```{r}
+library(PerformanceAnalytics)
+library(mgcv)
+library(splines)
+
+data(trees)
+```
+
+We can give a first look at the data to check for patterns and dependencies:
+```{r}
+chart.Correlation(trees)
+```
+
+We can also check for multicollinearity:
+```{r}
+round(cor(trees), 2)
+```
+
+
+## Linear (or pseudo-linear) models
+
+Let's try to fit Volume as a function of Height (just as a first attempt) using a linear relation, a logarithmic relation and splines inside lm() (remember that to use non linear expressions of the variables we have to wrap the expression with the function I()):
+```{r}
+lm.lin <- lm(Volume ~ Height, data = trees)
+lm.log <- lm(Volume ~ I(log(Height)), data = trees)
+lm.sp1 <- lm(Volume ~ bs(Height), data = trees)
+```
+```{r}
+summary(lm.lin)
+```
+```{r}
+summary(lm.log)
+```
+```{r}
+summary(lm.sp1)
+```
+
+We now try to increase the degrees of freedom for the spline functions:
+```{r}
+lm.sp2 <- lm(Volume ~ bs(Height, df = 6), data = trees)
+summary(lm.sp2)
+```
+A bit better than the previous one.
+
+From the previous paragraph we expect Girth to be more correlated with Volume. Let's see:
+```{r}
+lm.alt <- lm(Volume ~ Girth, data = trees)
+summary(lm.alt)
+```
+As expected this fit is much better.
+
+
+## Multilinear models
+
+We can add variables and interaction (i.e. product) between variables (using ':'):
+```{r}
+lm.more <- lm(Volume ~ Height+Girth, data = trees)
+lm.inter <- lm(Volume ~ Height+Girth+Height:Girth, data = trees)
+```
+```{r}
+summary(lm.more)
+```
+```{r}
+summary(lm.inter)
+```
+
+
+## Checking linear model's assumptions graphically
+
+We can use chart.Correlation() on the raw data (as we did in the beginning).
+
+To visualize the stuff about the fit we can do:
+```{r}
+par(mfrow = c(2, 2))
+plot(lm.lin)
+```
+
+The first plot is useful to check linearity and also homoschedasticity. The second one to check normality of the stochastic component. The third one is a better way to check for homoscedasticity (in this situation we expect to see a roughly constant line about one). The fourth one is usually used to check for high-leverage outliers, which can be a problem during the estimation of the parameters; they can be recognized as the ones being out of the dashed red boundaries.
+
+We can also do it for multilinear models:
+```{r}
+par(mfrow = c(2, 2))
+plot(lm.inter)
+```
+
+Another interesting plot to inspect is the index Vs residuals (i.e. the plot of the residuals 'as found in the sample'). If a pattern seems to emerge from this analysis, there could be an autocorrelation among the variables (for example a time correlation).
+```{r}
+plot(lm.inter$residuals)
+```
+
+Here we cannot see any apparent pattern.
+
+
+## Generalized linear and additive models
+
+First we try with a glm with gamma family (we cannot use Poisson family because Y is a continuous variable):
+```{r}
+glm.gamm <- glm(Volume ~ Height, data = trees, family = Gamma(link = "log"))
+summary(glm.gamm)
+```
+
+Let's try now with gam:
+```{r}
+gam.gamm <- gam(Volume ~ s(Height), data = trees, family = Gamma(link = "log"))
+summary(gam.gamm)
+```
+
+We can analyze the AIC:
+```{r}
+c(AIC(lm.lin), AIC(lm.log), AIC(lm.sp1), AIC(lm.sp2), AIC(glm.gamm), AIC(gam.gamm))
+```
+
+Notice that the fact that Height does not need the spline in glm (as we can see from the AIC values) is also suggested by the fact that in the gam.gamm summary the estimated degrees of freedom of s(Height) is equal to one.
+
+
+## Adding predictors to generalized linear model
+
+We now add the Girth variable to the two best models:
+```{r}
+glm.more <- glm(Volume ~ Height+Girth, data = trees, family = Gamma(link = "log"))
+gam.more <- gam(Volume ~ s(Height)+s(Girth), data = trees, family = Gamma(link = "log"))
+```
+```{r}
+summary(glm.more)
+```
+```{r}
+summary(gam.more)
+```
+```{r}
+c(AIC(glm.more), AIC(gam.more))
+```
+
+We can see that the gam is better. We can still try to mix linear and spline contributes inside the additive model, and see if we get some improvement. From the estimated degrees of freedom in gam.more we expect to get a worse model mixing spline Height and linear Girth and to get a roughly equal (maybe slightly better) model mixing linear Height and spline Girth.
+```{r}
+gam.mix1 <- gam(Volume ~ s(Height)+Girth, data = trees, family = Gamma(link = "log"))
+summary(gam.mix1)
+```
+```{r}
+AIC(gam.mix1)
+```
+
+```{r}
+gam.mix2 <- gam(Volume ~ Height+s(Girth), data = trees, family = Gamma(link = "log"))
+summary(gam.mix2)
+```
+```{r}
+AIC(gam.mix2)
+```
+
+
+## GLM Vs GAM
+
+Let's see if there are any difference between glm and gam with linear contribution, by rewriting glm.more using the gam function:
+```{r}
+glm.more.fake <- gam(Volume ~ Height+Girth, data = trees, family = Gamma(link = "log"))
+summary(glm.more.fake)
+```
+```{r}
+AIC(glm.more.fake)
+```
+We see that the 'fake' glm and the true one are roughly the same (aside from a very small difference in the AIC).
+
+The 'opposite' thing (i.e. if glm with splines) is not possible: glm cannot handle splines.
+
+
+## s() and bs() splines
+
+To see the difference between normal splines and B-splines, we build the same model with both:
+```{r}
+gam.more.s <- gam(Volume ~ s(Height)+s(Girth), data = trees, family = Gamma(link = "log"))
+gam.more.bs <- gam(Volume ~ bs(Height)+bs(Girth), data = trees, family = Gamma(link = "log"))
+```
+```{r}
+summary(gam.more.s)
+```
+```{r}
+summary(gam.more.bs)
+```
+```{r}
+c(AIC(gam.more.s), AIC(gam.more.bs))
+```
+
+
+## Best model
+
+To compare nested models the best thing is to use ANOVA (in R the anova() function). It is useful to understand the significance of every parameter (and so the weight of every predictor), and to choose the right degree of complexity of the model.
+Recall that to perform a test in anova() you MUST specify a test in the function's parameters (test = "...", usually "LR").
+
+To compare models of different 'kind' (for example a glm and a gam, or two glm with different error structures and links) the best tools are AIC and BIC. It doesn't make sense to perform ANOVA on non nested models.
+
+
+
+
+
+
+
+
+
+DIFFERENZA TRA S E BS IN GAM?
+
+FARE UN GLM OPPURE FARE UN GAM SENZA S() È ESATTAMENTE LA STESSA COSA?

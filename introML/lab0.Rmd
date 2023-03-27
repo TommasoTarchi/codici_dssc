@@ -1,0 +1,146 @@
+---
+title: "Lab 1: let's know iris"
+output: html_notebook
+---
+
+## Premise
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook.
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+# Goals
+1. get `iris` data
+2. know basic info about it
+3. plot iris and play with it
+
+# Possible "solution"
+
+## Get data
+
+`iris` is so common that it is a global variable preloaded in the R environment.
+Hence you can "access" it by just writing `iris`.
+```{r}
+iris
+```
+
+In a notebook, you see the result nicely formatted.
+Try execute it in the console to see the "raw" result.
+
+In a more common case, you load the data from a file or directly from the network.
+In the former case, you usually use `read.table` and its variants (`read.csv`, `read.csv2`).
+
+## Basic exploration of the data
+
+Let's use another variable for working on `iris`: `d` stands for data.
+```{r}
+d = iris
+```
+Note that `d` is an identifier of a variable whose value is a "dataframe", i.e., a table with columns with values of homogeneous type.
+
+See its size, in three different ways.
+```{r}
+dim(d)
+```
+```{r}
+nrow(d)
+```
+
+```{r}
+ncol(d)
+```
+
+Ok, we got it: it's a $150 \times 5$ table.
+
+For an overview of the content, use `summary`.
+```{r}
+summary(d)
+```
+
+For each one of the numerical variables (columns) of the dataframe, basic descriptive statistics are shown; for categorical variables, the number of occurrences of each possible (actually valued) values is shown.
+
+For just showing the names of the variables, use `names`.
+```{r}
+names(d)
+```
+
+`names` can also be used for changing the names:
+```{r}
+names(d)[2] = "sw"
+summary(d)
+```
+
+(Now let's restore the original name).
+```{r}
+d = iris
+names(d)
+```
+
+## Basic graphical exploration
+
+`plot` is an R function that can be used to plot almost everything.
+It is an example of polymorphism: its behavior changes depending on what it is invoked with.
+
+### Examples of `plot` usages
+
+```{r}
+plot(c(1,2,3,4,3,2,1))
+```
+
+```{r}
+x = seq(0, 10, 0.01)
+plot(x, sin(x))
+```
+
+Can it be used with our `d` too?
+```{r}
+plot(iris)
+```
+
+Yes, and it produces something useful.
+Actually really useful for our current purpose (explore the data).
+
+Yet, serious plotting is usually done with different tools.
+The most common one is `ggplot`.
+
+## Plotting with `ggplot`
+
+`ggplot` is a *package* that itself is a member of a larger family of R packages: `tidyverse`.
+Install it `install.packages("tidyverse")` (not done in this notebook, may be tricky; note that you do not really need the full `tidyverse` package for doing the things we'll do) and load it.
+```{r}
+require("tidyverse")
+```
+
+### Trivial plot with `ggplot`
+
+*Key point*: before doing a plot, 
+- first, _decide_ what is the question the plot is going to (attempt to) answer
+- then, _design_ the plot accordingly
+
+Question: are the sepal length and sepal width somehow related for the species Setosa?
+Design: the two variables on the axes of a *scatterplot*, one point for each Setosa sample in `d`.
+```{r}
+d %>% filter(Species=="setosa") %>% ggplot(aes(x=Sepal.Length, y=Sepal.Width)) + geom_point()
+```
+
+New question: Is this dependency different among the three Species?
+```{r}
+d %>% ggplot(aes(x=Sepal.Length, y=Sepal.Width, color=Species)) + geom_point()
+```
+
+### Less trivial
+
+Question: Are the distribution of variables different among species?
+Design: three boxplots
+```{r}
+d %>% pivot_longer(cols=!Species) %>% ggplot(aes(x=Species, y=value)) + geom_boxplot() + facet_grid(.~name, scales="free")
+```
+
+Maybe even better with violin-plots.
+```{r}
+d %>% pivot_longer(cols=!Species) %>% ggplot(aes(x=Species, y=value)) + geom_violin() + facet_grid(.~name, scales="free")
+```
+
+## Take-home
+
+- Versicolor and Virginica appear harder to tell apart than Setosa.
+- Petal-related attributes appear more useful (for inferring the species) than sepal- ones.

@@ -1,0 +1,149 @@
+---
+title: "lab3"
+author: "tommaso tarchi"
+date: "2022-11-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## interval estimation for normal distribution
+
+### theory
+
+For the mean of a normal distribution, we can compute the interval estimation with confidence level 0.95 (i. e. $\alpha=0.05$) using the usual pivotal quantity T and then check how accurate the estimate actually is:
+```{r}
+set.seed(1234)
+
+#normal case with sigma^2 known (consider mu = 5 and sigma = 2 and n = 10)
+B <- 1000
+n <- 10
+mu <- 5
+sigma <- 2
+
+# 1-alpha is the confidence level
+alpha <- 0.05
+# CI is matrix where we save the confidence intervals for each replication:
+# -) first column: lower bound
+# -)  second column: upper bound
+CI <- matrix(NA, B, 2)
+
+# l is a vector whose elements assume TRUE (1) or FALSE(0) depending on whether the true parameter value lies within the interval
+l <- rep(NA, B)
+
+# qualtile of the standard normal
+q0975 <- qnorm(1 - alpha/2)
+
+for (i in 1:B) {
+  CI[i, ] <- mean(rnorm(n, mu, sigma)) + c(-1, 1)*sigma*q0975/sqrt(n)
+  l[i] <- CI[i, 1] < mu & CI[i, 2] > mu
+}
+
+mean(l)
+```
+
+We now plot the first 100 c.i.:
+```{r}
+# black: intervals that not include mu
+# red: intervals that include mu
+
+plot(1, xlim = c(0, 10), ylim = c(0, 11), type = "n", 
+     xlab = expression(mu), ylab = "", yaxt  = "n", 
+     main = paste("100 IC for the mean (known variance)"), cex.main = 1.2)
+abline(v = mu)
+
+d <- 0
+for ( i in 1 : 100 ) {
+    d <- d + 0.1 
+    lines(seq(CI[i, 1], CI[i, 2], length = 100), rep(d, 100), col = (l[i] + 1))
+}
+```
+
+```{r}
+sum(l[1:100])
+```
+
+In the case in which also the variance is unknown, we can use the same pivotal quantity with $s$ (sample standard deviation) in place of $\sigma$, which is distributed as a $t_{n-1}$ distribution (which again is symmetric).
+
+### application
+
+We want to estimate the mean of the difference between 'heated' and 'ambient' in pair65 (we do it for the first n measurements). Since both mean and st. dev. are unknown, we will use the student t distribution:
+
+```{r}
+library(DAAG)
+n <- 9
+pair_data_frame <- cbind(pair65, pair65[,1] - pair65[,2])
+pair_data_frame <- cbind(c(1:n), pair_data_frame)
+dimnames(pair_data_frame) <- list(1:n, c("pair","heated", "ambient", "difference"))
+
+# D stands for 'difference'
+mD <- mean(pair_data_frame[, 2]) - mean(pair_data_frame[, 3])
+sdD <- sqrt(var(pair_data_frame[, 2]) + var(pair_data_frame[, 3])) / sqrt(n)
+mD
+mean(pair_data_frame[, 4])
+sdD
+sd(pair_data_frame[, 4]) / sqrt(n)
+
+# then we just apply the same procedure as above using the student t distribution with n-1 degrees of freedom
+```
+
+
+## hypothesis test
+
+### p-value
+
+Test on the average number of followers for musicians and 'others' on twitter:
+```{r}
+# for code see LAB3.html
+```
+
+### Pearson's chi-squared test
+
+Si noti che la frequenza usata nel test di Pearson è quella assoluta, non relativa.
+
+For the darts example with 4 zones on the target, 50 shots and p probabilities of hitting the four zones:
+```{r}
+# Initial settings:
+# number of attempts n = 50
+# number of zones K = 4
+# vector of probabilities p = c( 7/16, 5/16, 3/16, 1/16)
+n <- 50
+K <- 4
+p <- c(7/16, 5/16, 3/16, 1/16)
+
+set.seed(1234)
+x <- sample(1:K, n, prob = p, replace = TRUE)
+x
+
+# observed frequencies
+obs <- table(x)
+obs
+
+# we now perform the test 'by hand' (value is chisq computed on the sample)
+X2 <- sum((obs - p*n)^2 / (p*n))
+p.value <- pchisq(X2, K-1, lower.tail = FALSE)
+p.value
+```
+Si noti (in riferimento a LAB3) che cambiando le condizioni sperimentali e mantenendo la stessa null hypotesis possiamo controllare se l'ipotesi è più o meno verificata, ma non possiamo capire in che direzione cambiarla.
+
+We now do the example with more than one friend and a great player:
+```{r}
+set.seed(123)
+
+# number of friends
+M <- 6
+pg <- c(1/16, 3/16, 5/16, 7/16)
+
+# x for friends and x_great for great player
+x <- matrix(0, M, n)
+for (i in 1:M)  x[i, ] <- sample(1:K, n, replace = TRUE, prob = p)
+x_great <- sample(1:K, n, replace = TRUE, prob = pg)
+
+obs <- apply(x, 1, table)
+obs <- cbind(obs, table(x_great))
+obs
+
+chisq.test(obs, p = p)
+```

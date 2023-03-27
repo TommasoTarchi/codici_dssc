@@ -1,0 +1,43 @@
+Notes for the project
+
+1) [FATTO] Ricordarsi di scrivere perché abbiamo scelto unsupervised learning
+
+2) [FATTO] spiegare cosa si fa con i dati mancanti
+	2a) ricordarsi di dire che abbiamo tolto dal dataset la seconda colonna, quella con il numero di foglie per classe (per evitare che influenzi la predizione della y)
+
+3) [NO] Spiegare perchè abbiamo scelto python
+
+4) Valutare quali variabili hanno più peso nella classificazione [slides262-263]
+
+5) [NO] Quando spieghiamo quale learning technique abbiamo usato e perché, aggiungere commento su come si comporta in terms of applicability, efficiency and explainability/interpretability (?)
+
+6) [FATTO] Possiamo fare un confronto sulle tempistiche di ogni tecnica (sarebbe in terms of efficiency)
+	
+7) per divisione argomenti: vedi appunti su slide 203. Forse dall'hyperparameter tuning siamo già nella fase di experimental evaluation
+	dal suo sito, parte sul final project: The document will contain (not necessarily in the following order, not necessarily in a structure of sections corresponding to the following items) [vedi slide 46 per divisione alternativa]
+
+DOMANDE PER PROF:
+1) serve che descriviamo un minimo il dataset o possiamo evitare visto che usiamo il dataset fornito da lui? (lui a lezione aveva detto di non descriverli, ma richiederei)
+2) come segniamo i nostri nomi?
+3) quanti dettagli vuole che diamo, serve che gli specifichiamo quali sono i valori degli optimal hyperparameters che abbiamo trovato per ogni learning technique?
+
+
+
+SCALETTA:
+
+- Avere chiaro il laboratorio IRIS
+- Scelta tecnica di learning -> random forest, SVM, kNN, single tree -> valutazione di quale tecnica fare in base all'errore
+	per questa fase si potrebbe fare il cross validation
+- Capire come fare un random forest su python
+	importare dataset
+	tipi di variabili (liste, dataframe)
+	visualizzazione risultati
+
+- Capire se python fa la divisione tra learning e testing sets da solo, e come
+- Scegliere i parametri (slide 253)
+- Implementazione
+- Scelta metodo di valutazione e implementazione
+- Parlare anche del tempo richiesto per i calcoli (confronto tra k CV e LOOCV)
+
+
+

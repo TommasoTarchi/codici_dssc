@@ -1,0 +1,238 @@
+---
+title: "Summary for linear models and generalized linear models"
+author: "tommaso tarchi"
+date: "2023-01-19"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Dataset
+
+To avoid possible correlation between observations we use only data from one year.
+
+```{r}
+## importing the dataset and omitting the missing values
+datafile <- read.csv("../WiscNursingHome.csv")
+datafile <- na.omit(datafile)
+
+## dividing data from different years
+data_2000 <- datafile[datafile$CRYEAR == 2000, ]
+rownames(data_2000) <- 1:nrow(data_2000)
+data_2001 <- datafile[datafile$CRYEAR == 2001, ]
+rownames(data_2001) <- 1:nrow(data_2001)
+
+datafile$ORGSTR <- as.factor(datafile$ORGSTR)
+datafile$MSA <- as.factor(datafile$MSA)
+
+data_2000$UTILIZATION_RATE <- data_2000$TPY / data_2000$NUMBED
+```
+
+
+## Linear models
+
+First let's take a look at the model with just SQRFOOT as a predictor:
+```{r}
+summary(lm(TPY ~ SQRFOOT, data = data_2000))
+```
+```{r}
+par(mfrow = c(2, 2))
+plot(lm(TPY ~ SQRFOOT, data = data_2000))
+```
+
+SQRFOOT seems to be a good predictor for TPY, but from the analysis of residuals we see that our model lacks the property of homoscedasticity and that there is at least one high leverage outlier. A possible way to fix these issues is to transform the variables somehow. After some attempts we found a linear relation between log(TPY) and log(SQRFOOT).
+
+```{r}
+summary(lm(log(TPY) ~ log(SQRFOOT), data = data_2000))
+```
+```{r}
+par(mfrow = c(2, 2))
+plot(lm(log(TPY) ~ log(SQRFOOT), data = data_2000))
+```
+
+
+### Adding categorical variables
+
+We fitted various models and we found out (comparing t-test's p-values, AIC and adjusted $R^2$ scores) that among categorical variables only TAXEXEMPT, PRO, ORGSTR and MCERT gave a relevant contribute.  ***valutare se aggiungere i dati raccolti su questi modelli***
+
+```{r}
+summary(lm(TPY ~ log(SQRFOOT) + URBAN + PRO + TAXEXEMPT + SELFFUNDINS + MCERT, data = data_2000))
+```
+```{r}
+library(car)
+vif(lm(TPY ~ log(SQRFOOT) + URBAN + PRO + TAXEXEMPT + SELFFUNDINS + MCERT, data = data_2000))
+```
+
+
+
+As we saw in the data analysis part (***aggiungere barplots in data analysis***) TAXEXEMPT, PRO and ORGSTR express somehow similar information. In fact, comparing AIC for models with different combinations of these variables, we can see that including all of them does not add any important information to the model.
+
+```{r}
+AIC(lm(log(TPY) ~ log(SQRFOOT) + MCERT + factor(ORGSTR) + TAXEXEMPT + PRO, data = data_2000),
+    lm(log(TPY) ~ log(SQRFOOT) + MCERT + factor(ORGSTR) + TAXEXEMPT, data = data_2000),
+    lm(log(TPY) ~ log(SQRFOOT) + MCERT + factor(ORGSTR) + PRO, data = data_2000),
+    lm(log(TPY) ~ log(SQRFOOT) + MCERT + TAXEXEMPT + PRO, data = data_2000),
+    lm(log(TPY) ~ log(SQRFOOT) + MCERT + factor(ORGSTR), data = data_2000),
+    lm(log(TPY) ~ log(SQRFOOT) + MCERT + PRO, data = data_2000),
+    lm(log(TPY) ~ log(SQRFOOT) + MCERT + TAXEXEMPT, data = data_2000))
+```
+
+It turns out that adding TAXEXEMPT is enough.
+
+
+### Adding NUMBED
+
+At this point our best model is the following (we report it with its diagnosis):
+```{r}
+fit.best <- lm(log(TPY) ~ log(SQRFOOT) + TAXEXEMPT, data = data_2000)
+summary(fit.best)
+```
+```{r}
+anova(fit.best)
+```
+```{r}
+par(mfrow = c(2, 2))
+plot(fit.best)
+```
+
+We can observe that, apart from one or two outliers, the residuals satisfy the assumptions of homoscedasticity and normality.
+
+```{r}
+summary(lm(log(TPY) ~ log(NUMBED) + log(SQRFOOT) + TAXEXEMPT, data = data_2000))
+```
+
+We tried to include in the model SQRFOOT before NUMBED and vice versa, and we performed ANOVA and measured AIC. The outcome was that NUMBED was a much stronger predictor than SQRFOOT. In fact, as we can see in the following two chunks, adding SQRFOOT to a model that already contains NUMBED is basically irrelevant (also because the two varables are strongly correlated), if not even damaging to the model (because of added complexity):
+```{r}
+anova(lm(log(TPY) ~ log(SQRFOOT) + log(NUMBED) + MCERT + TAXEXEMPT, data = data_2000));
+anova(lm(log(TPY) ~ log(NUMBED) + log(SQRFOOT) + MCERT + TAXEXEMPT, data = data_2000))
+```
+```{r}
+AIC(lm(log(TPY) ~ log(NUMBED) + log(SQRFOOT) + MCERT + TAXEXEMPT, data = data_2000),
+    lm(log(TPY) ~ log(NUMBED) + MCERT + TAXEXEMPT, data = data_2000))
+```
+
+We also tried to include the interaction between the two variables, but it seemed to not add any relevant information.
+
+
+```{r}
+anova(lm(log(TPY) ~ log(NUMBED) + log(SQRFOOT) + TAXEXEMPT, data = data_2000))
+```
+```{r}
+AIC(lm(log(TPY) ~ log(NUMBED) + log(SQRFOOT) + TAXEXEMPT, data = data_2000),
+    lm(log(TPY) ~ log(NUMBED) + TAXEXEMPT, data = data_2000))
+```
+
+
+
+
+The problem with NUMBED as a predictor arose when we analysed the residuals' plots: in whatever way we included the variable (or its logarithm), the residuals were never meeting the assumptions of neither homoscedasticity or normality. In the following chunks we can see one of the many possible examples:
+```{r}
+summary(lm(log(TPY) ~ log(NUMBED) + TAXEXEMPT, data = data_2000))
+```
+```{r}
+par(mfrow = c(2, 2))
+plot(lm(log(TPY) ~ log(NUMBED) + TAXEXEMPT, data = data_2000))
+```
+
+We can easily spot the presence of several outliers that seem to compromise both the assumptions.
+
+The plots suggest that these outliers are observations for which TPY is a lot lower (and sometimes higher) than expected. This means that during the year these nursing houses have been underusing (and some of them overusing) their facilities. We can measure this "misuse" by the new variable we defined UTILIZATION_RATE.
+
+
+### Removing outliers
+
+For a mere illustration purpose we can remove the observations with the most extreme values of UTILIZATION_RATE and try to refit the model with NUMBED as a predictor.
+
+Let's inspect the UTILIZATION_RATE variable:
+```{r}
+hist(data_2000$UTILIZATION_RATE, breaks = 20);
+summary(data_2000$UTILIZATION_RATE)
+```
+
+After a couple of attempts, we found a good bound on UTILIZATION_RATE, for which the assumptions on the residuals were met. Here is the model:
+```{r}
+# removing outliers
+data_trunc <- data_2000[data_2000$UTILIZATION_RATE > 0.85 & data_2000$UTILIZATION_RATE < 1.07, ]
+rownames(data_trunc) <- 1:nrow(data_trunc)
+```
+```{r}
+# fitting the model
+fit.trunc.best <- lm(log(TPY) ~ log(NUMBED) + TAXEXEMPT, data = data_trunc)
+summary(fit.trunc.best)
+```
+```{r}
+par(mfrow = c(2, 2))
+plot(fit.trunc.best)
+```
+
+
+Just to check the improvement we can compare the AIC score of this model with the previously found best model.
+
+```{r}
+# first we refit fit.best on the dataset without the outliers
+fit.best2 <- lm(log(TPY) ~ log(SQRFOOT) + MCERT + TAXEXEMPT, data = data_trunc)
+
+AIC(fit.best2, fit.trunc.best)
+```
+
+This was just to show that for non extreme values of UTILIZATION_RATE log(NUMBED) is a strong linear predictor for log(TPY). Obviously this is not a usable model, since to compute UTILIZATION_RATE we need to know TPY in advance. However, it could be used in cases in which we have a method to estimate if UTILIZATION_RATE is likely to be extreme or not (for example using data from the previous years).
+
+
+## Gamma models
+
+A similar model to the linear one with log-transformed variables is the generalized linear model with gamma error structure and logarithmic link.
+
+We tried to fit some models of this kind but, as expected, the results were not different from what we had found earlier. Again NUMBED turned out to be the strongest predictor, but with bad residuals.
+
+```{r}
+summary(glm(TPY ~ NUMBED + TAXEXEMPT, data = data_2000, family = Gamma(link = "log")))
+```
+```{r}
+summary(glm(TPY ~ log(NUMBED) + log(SQRFOOT) + TAXEXEMPT, data = data_2000,
+            family = Gamma(link = "log")))
+```
+```{r}
+AIC(glm(TPY ~ NUMBED + SQRFOOT + TAXEXEMPT, data = data_2000, family = Gamma(link = "log")),
+    glm(TPY ~ log(NUMBED) + log(SQRFOOT) + TAXEXEMPT, data = data_2000,
+        family = Gamma(link = "log")),
+    glm(TPY ~ log(NUMBED) + TAXEXEMPT, data = data_2000, family = Gamma(link = "log")),
+    glm(TPY ~ log(SQRFOOT) + TAXEXEMPT, data = data_2000, family = Gamma(link = "log")))
+```
+
+```{r}
+library(DHARMa)
+```
+```{r}
+q.sim1 <- simulateResiduals(glm(TPY ~ log(NUMBED) + TAXEXEMPT, data = data_2000,
+                               family = Gamma(link = "log")), n = 1000)
+plot(q.sim1)
+```
+```{r}
+summary(glm(TPY ~ log(SQRFOOT) + TAXEXEMPT, data = data_2000, family = Gamma(link = "log")))
+```
+```{r}
+q.sim2 <- simulateResiduals(glm(TPY ~ log(SQRFOOT) + TAXEXEMPT, data = data_2000,
+                               family = Gamma(link = "log")), n = 1000)
+plot(q.sim2)
+```
+
+```{r}
+AIC(glm(TPY ~ NUMBED + MCERT + TAXEXEMPT, data = data_2000, family = Gamma(link = "log")),
+    glm(TPY ~ SQRFOOT + MCERT + TAXEXEMPT, data = data_2000, family = Gamma(link = "log")))
+```
+
+Note on interpretation of the scatterplots above: in gamma generalized linear models there is no homoscedasticity, since gamma's mean and variance change together. However, we can use the DHARMa package to simulate the expected distribution of residuals, and check the coherence with that of the true residuals.
+
+
+
+```{r}
+AIC(lm(log(TPY) ~ log(SQRFOOT) + TAXEXEMPT, data = data_2000),
+    glm(TPY ~ log(SQRFOOT) + TAXEXEMPT, data = data_2000, family = Gamma(link = "log")))
+```
+

@@ -1,0 +1,825 @@
+---
+title: "GroupL_HW1"
+author: "G. Varutti, S. De Cleva, G. Costanzo, T. Tarchi"
+date: '2022-10-24'
+output:
+  html_document:
+    toc: yes
+    toc_depth: '3'
+    df_print: paged
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## FSDS - Chapter 1 
+
+### Ex 1.41
+*To investigate how* $\overline{y}$ *can vary from sample to sample of size* $n$,*for the simulation from a bell-shaped population shown at the end of Section 1.5.3 (*$X\sim\mathcal{N}(100,\ 16^2)$*), take (a) 10,000 random samples of size* $n$*= 30 each; (b) 10,000 random samples of size* $n$ *= 1000 each. In each case, form a histogram of the 10,000* $\overline{y}$ *values and find their standard deviation. Compare results and explain what this simulation reveals about the impact of sample size on how study results can vary.*
+
+**Solution**
+
+
+```{r}
+library(MASS)
+N <- 10000
+n1 <- 30
+n2 <- 1000
+r1 <- rep(NA, N)
+r2 <- rep(NA, N)
+
+for (i in 1:N) {
+  r1[i] <- mean(rnorm(n1, 100, 16))
+  r2[i] <- mean(rnorm(n2, 100, 16))
+}
+
+par(mfrow = c(1, 2))
+hist.scott(r1, xlim = c(85, 115))
+hist.scott(r2, xlim = c(85, 115))
+par(mfrow = c(1, 2))
+plot(density(r1), type = 'l', xlim = c(85, 115))
+plot(density(r2), type = 'l', xlim = c(85, 115))
+
+stand_dev1 <- sd(r1)
+stand_dev2 <- sd(r2)
+stand_dev1
+stand_dev2
+stand_dev1/stand_dev2
+sqrt(1000/30)
+```
+We can observe that increasing the sample size, the mean value of the sample remains the same, instead the standard deviation decreases by a factor of $\sqrt{n_2/n_1}$. In fact, in this particular case, the ratio of the standard deviations is $\approx \sqrt{1000/30}=\sqrt{n_2/n_1}$.
+
+### Ex 1.43
+
+*For a sample with mean* $\overline{y}$*, show that adding a constant* $c$ *to each observation changes the mean to* $\overline{y}+c$*, and the standard deviation* $s$ *is unchanged. Show that multiplying each observation by* $c$ *changes the mean to* $c\overline{y}$ *and the standard deviation to* $\lvert c\lvert s$.
+
+**Solution**
+
+Let $\{y_i\}_{i=1}^n$ be a sample of N random variables identically distributed. The mean value and the variance (which is equal to the squared standard deviation) of the sample are defined by:
+$$\bar{y}=\frac{1}{N}\sum_{i=1}^N y_i \ , \ \ \ s_y^2=\frac{1}{N-1}\sum_{i=1}^N (y_i-\bar{y})^2$$
+Define a variable $z_i=y_i+c$. The mean is:
+$$
+\bar{z}=\frac{1}{N}\sum_{i=1}^N(z_i)=\frac{1}{N}\sum_{i=1}^N(y_i +c ) = \frac{1}{N}\left(\sum_{i=1}^N{y_i}+Nc\right) = \frac{1}{N}\sum_{i=1}^N{y_i}+c = \bar{y}+c \ .
+$$
+The variance of the sample $\{z_i\}_i$ is:
+$$
+s_z^2=\frac{1}{N-1}\sum_{i=1}^N \left[z_i-\bar{z}\right]^2=\frac{1}{N-1}\sum_{i=1}^N \left[(y_i+c)-(\bar{y}+c)\right]^2=\frac{1}{N-1}\sum_{i=1}^N (y_i-\bar{y})^2 = s_y^2 \ .
+$$
+Now we multiply by a constant, re-defining the variable $z_i=cy_i$. The mean is:
+$$
+\bar{z}=\frac{1}{N}\sum_{i=1}^Nc y_i = c\frac{1}{N}\sum_{i=1}^N{y_i} = c\bar{y} \ .
+$$
+And for the variance:
+$$
+s_z^2=\frac{1}{N-1}\sum_{i=1}^N \left[(cy_i)-(c\bar{y})\right]^2=\frac{1}{N-1}\sum_{i=1}^N c^2(y_i-\bar{y})^2 = c^2\frac{1}{N-1}\sum_{i=1}^N (y_i-\bar{y}) = c^2s_y^2 \ .
+$$
+the square root of which is $|c|s_y$.
+
+### Ex 1.44
+
+*Suppose the sample data distribution of* $\{y_i\}=\{y_1\ ,\ \dots\,\ y_n\}$ *is very highly skewed to the right, and we take logs and analyze*$\{x_i=\log{(y_i)}\}$.\
+*(a) Is* $\overline{x} = \log{(\overline{y})}$*)? Why or why not?*\
+*(b) Is* $\text{median}(\{x_i\})=\log{[\text{median}(\{y_i\})]}$*? Why or why not?*\
+*(c) To summarize* $\{y_i\}$*, we find* $\overline{x}$ *and then use* $\exp(\overline{x})$*. Show that* $\exp{(\overline{x})} = (\prod_i{y_i})^{1/n}$*, called the* **geometric mean** *of *$\{y_i\}$.
+
+**Solution**
+
+a) The answer is no, because, arithmetically, the logarithm of a sum ($\log(\overline{y})$) is not equal to the sum of logarithms.
+$$
+\overline{x}= \frac{\sum_{i=1}^{n}log(y_i)}{n} \neq 
+log(\overline{y}) = 
+log\left(\frac{ \sum_{ i=1 }^{ n }{y_i} }{ n }\right)  
+$$
+
+b) In this case the answer is yes (arithmetically: $\text{median}(\{x_i\})=\log{[\text{median}(\{y_i\})]}$). Given that {$y_i$} is the ordered sample, because of the fact that the log function is monotonic, we have that {$x_i$} is ordered too, and the median will be in the same position (meaning that it will have the same index) after applying the log function to the sample data.
+
+In practice, a issue may arise if we have an even number of values. In this particular case, it is necessary to use the arithmetic mean of the two co-medians, as a conventional rule for the median of an even number of values. Then, in this case, $\text{median}(\{x_i\})\ne\log{[\text{median}(\{y_i\})]}$. For consistency with working on logarithmic scale we would need to use the geometric mean of the co-medians.
+
+c) Geometric Mean: 
+
+By the fact that $\sum_{i} log(y_i)=log\left(\prod_i y_i\right)$ and given the exponential rule for the logarithms, we arrive to the following expression: 
+
+$$
+\exp(\bar{x})=\exp\left[\frac{\sum_{i} log(y_i)}{n}\right]=\left(\exp \left[log\left(\prod_i y_i\right)\right]\right)^\frac{1}{n}=\left(\prod_i y_i \right)^\frac{1}{n}
+$$
+
+### Ex 1.45
+
+*Find the Chebyshev inequality upper bound for the proportion of observations falling at least (a) 1, (b) 2, (c) 3 standard deviations from the mean. Compare this to the approximate proportions for a bell-shaped distribution. Why are the differences so large?*
+
+**Solution**
+
+We consider the Chebyshev inequality
+$$
+Pr(|x-\mu|\geq k\sigma)\leq \frac 1{k^2} \
+$$
+with $k$ a real number $k>0$, $\mu$ the expected value and $\sigma$ the standard deviation.
+If we change the value of the parameter $k$, the inequality returns an upper bound for the probability of an observation to fall at least $k$ standard deviation from the mean.
+
+a) Assuming $k=1$
+$$
+Pr(|x-\mu|)\geq \sigma)\leq1 \
+$$
+The upper bound is $1$.
+
+b) For $k=2$
+$$
+Pr(|x-\mu|)\geq 2\sigma)\leq\frac{1}{4} \
+$$
+The upper bound is $\frac{1}{4}$.
+
+c) For $k=3$
+$$
+Pr(|x-\mu|)\geq 3\sigma)\leq\frac{1}{9} \
+$$
+The upper bound is $\frac{1}{9}$.
+
+For a bell-shaped distribution (normal distribution), it is known that the probability of an observation to fall within 1, 2 and 3 standard deviations from the mean is respectively 68,3%, 95,4% and 99,7%. Therefore, the probability for an observation to be at least at $k$ standard deviation form the mean is given by 
+
+a)$k=1$
+$$
+Pr(|x-\mu|)\geq \sigma)=1-0.683=0.327 \
+$$
+b)$k=2$
+$$
+Pr(|x-\mu|)\geq 2\sigma)=1-0.954=0.056 \
+$$
+c)$k=3$
+$$
+Pr(|x-\mu|)\geq 3\sigma)=1-0.997=0.003 \
+$$
+
+The big differences between the upper bounds obtained by the Chebyshev inequality and the ones calculated applying the normal distribution are due to the fact that the Chebyshev inequality can be applied to any set of data, even if its distribution is unknown; it gives an indicative value about the probability, but being generic, it is not a well-fitted approximation. On the contrary, if we know the type of distribution of our data, we have more information and we can obtain an approximation that is more relevant for our experiment.
+
+### Ex 1.47
+
+*The least squares property of the mean states that the data fall closer to* $\overline{y}$ *than to any other number* $c$*, in the sense that*
+$$\sum_{i}{(y_i-\overline{y})^2}< \sum_{i}{(y_i-c)^2} $$
+*Prove this property by treating* $f(c)=\sum_{i}{(y_i-c)^2}$ *as a function of* $c$ *and deriving the value of* $c$ *that minimizes it.*
+
+**Solution**
+
+Let $f(c)=\sum_i (y_i-c)^2$ be a function of $c$. We want to find the value of $c$ for which the function $f(c)$ has its minimum. Taking the derivative, and equaling it to zero, we have:
+$$
+\frac{\partial f}{\partial c}=\sum_{i=1}^n \frac{\partial (y_i-c)^2}{\partial c}=-\sum_{i=1}^n 2(y_i-c)
+$$
+$$
+\frac{\partial f}{\partial c}=0 \implies -\sum_{i=1}^n 2(y_i-c)=0  \implies \sum_{i=1}^n y_i -nc=0 \implies c=\frac{1}{n}\sum_{i=1}^n y_i= \bar{y} \ .
+$$
+So, $c=\bar{y}$ is a stationary point for the function $f(c)$, and it is also the minimum, in fact:
+$$
+\frac{\partial^2 f}{\partial c^2} \geq0 \ .
+$$
+
+### Ex 1.48
+
+*For a sample* $\{y_i\}$ *of size* $n,\ \sum_{i}{\lvert y_i -c\lvert}$ *is minimized at* $c$ *= median. Explain why this property holds. (Hint: Starting at* $c$ *= median, what happens to* $\sum_{i}{\lvert y_i -c\lvert}$  *as you move away from it in either direction?)*
+
+**Solution**
+
+Let $\{y_i\}$ a sample of size $n$, and $f(c)=\sum_i |y_i-c|$ a function in the variable $c$, $\forall \ i=1,\dotsc,n$. We want to prove that the function $f$ is minimized when $c$ is the median. We can take the derivative and equaling it to zero:
+$$
+\frac{\partial f}{\partial c}=\sum_{i=1}^n \frac{\partial |y_i-c|}{\partial c}=-\sum_{i=1}^n \frac{y_i-c}{|y_i-c|}=-\sum_{i=1}^n \mathrm{sgn}(y_i-c)=\sum_{i=1}^n \mathrm{sgn}(c-y_i)=0 \ .
+$$
+The sum of the signs equal to zero means that the number of times in which $y_i>c$ is equal to the number of times in which $y_i<c$. In this way we have that the number of $+$ is equal to the number of $-$. Formally:
+$$
+\sum_{i=1}^n \mathrm{sgn}(c-y_i)=0 \implies \sum_i\textbf{1}(y_i>c)=\sum_i\textbf{1}(y_i<c) \implies \sum_i\Pr(y_i>c)=\sum_i\Pr(y_i<c)\ , 
+$$
+where $\textbf{1}(condition)= 1$ when the condition is true, 0 otherwise. This means exactly that the minimum value for $f$ occurs when $c$ divides the ordered sample $\{y_i\}$ in two equal parts, so when $c$ is the median.
+
+## FSDS - Chapter 2
+
+### Ex 2.3
+*According to recent data at the FBI website, of all Blacks slain in the U.S., 85% are slain by Blacks, and of all Whites slain, 93% are slain by Whites. Let* $Y$ *= victim’s race and* $X$ *= offender’s race*\
+*(a) Which conditional distribution do these probabilities refer to, * $Y$ *given* $X$*, or* $X$ *given* $Y$ *?*\
+*(b) Given that a murderer was White, what other probability do you need to estimate the conditional probability that the victim was White? To illustrate, fix a value of 0.60 for that other probability and find the conditional probability.*
+
+**Solution**
+
+a)The conditional distribution that describes the probabilities presented in the text of the exercise is $(X|Y)$: given the victim's race, we know the probability that the offender is Black or White.
+
+b)We can use the Bayes' theorem: we want to estimate the probability that, given that a murderer was White $(X_W)$, the victim was White $(Y_W)$:
+$$
+P(Y_W|X_W)=\frac{P(X_W|Y_W)P(Y_W)}{P(X_W|Y_W)P(Y)+P(X_W| \overline Y_W)P(\overline Y_W)} \
+$$
+We don't know $P(Y)$ : as written in the exercise, we fix $P(Y)=0.60$
+
+$$
+\frac{(0.93)(0,60)}{(0.93)(0.60)+(0.15)(0.40)}=0.903 \
+$$
+
+### Ex 2.5
+
+*Suppose that a person is equally likely to be born on any of 365 days of the year.*\
+*(a)For three people selected randomly, explain why the probability that they all have different birthdays is* $[(365)(364)(363)]/365^3$. \
+*(b) Show that if at least 23 people attend a social party, the probability exceeds 0.50 that at least two people have the same birthday. State any further assumptions needed for your solution. (The* `R` *function* `pbirthday(n)` *gives the probability that at least 2 of* $n$ *people have the same birthday.)*\
+*(c) Use a simulation to show that if 50 people attend the party, the probability is 0.97 of at least one common birthday. (If results seem counterintuitive, notice how the number of pairs of attendees increases as the number of attendees n increases.)*
+
+**Solution**
+
+a) The first person can be born in any day of the year, the second (considering a 365 days long year) only on 364 days out of 365 (all days except for the day in which the first one is born) and the third person only on 363 out of 365. So we multiply 1 for 364/365 for 363/365.
+
+b) The probability that at least two people are born in the same day is equal to the total probability (= 1) minus the probability that all the people are born in different days, so:
+```{r}
+ppl <- seq.int(343, 365, 1)
+prob <- 1 - prod(ppl)/(365 ** 23)
+prob
+pbirthday(23)   # just to check
+```
+
+c) The reasoning is the same as in b), so:
+```{r}
+ppl <- seq.int(316, 365, 1)
+prob <- 1 - prod(ppl)/(365 ** 50)
+prob
+```
+
+### Ex 2.7
+
+*For the simulation at the end of Section 2.3.1, explain why you could also simulate the mean with a single binomial experiment of 30 million observations and probability 0.50 of a head for each, dividing by 10,000,000. Do this and compare the result to the theoretical expected value.*
+
+**Solution**
+
+The binomial random variable defined in section 2.3.1 can be written as the sum of three independent and identically distributed Bernoulli random variables with probability $\pi=0.5$. Calling $z$ the binomial variable and $y_i$, with $i=1,2,3$, the three Bernoulli ones, we can write the sample mean of $z$ on 10 million experiments as:
+$$
+mean (z)= \frac{\sum_{j=1}^N\sum_{i=1}^3 y_i^j}{N} \ ,N=10000000
+$$
+where $y_i^j$ (that can be either 0 or 1) is the value of the $i$-th Bernoulli trial in the $j$-th binomial experiment of the sample.
+
+Since, as we said, the three Bernoulli random variables are identical, we can compute the same quantity (or, better, estimate the same quantity we are estimating above, i.e. the expectation value of z) using:
+$$
+mean(z)= \frac{1}{10000000} \sum_{i=1}^{3N} y_i 
+$$
+where $y_i$ is the $i$-th element of a sample of size $3N$ obtained by repeating a single Bernoulli experiment.
+
+We therefor obtain the estimated expectation value for $z$:
+$$
+E(z)=\frac{1}{10000000}NE(Y)=\frac{1}{10000000}N\pi=\frac{15000000}{10000000} =1.5
+$$    
+
+### Ex 2.10
+
+*A method of statistical inference has probability 0.05 of yielding an incorrect result. How many independent times can the method be used until the probability of all the inferences being correct is less than 0.50?*
+
+**Solution**
+
+The process of application of the method can be considered a Bernoulli experiment, so (being p the probability of having a single success) for a given number n of applications of the method, the probability of having all correct results is given by $p^n$ (the number of successes for n fixed is distributed as a binomial). To get the maximum number of applications such that the probability of having them all correct is greater than 0.5, we can just count how many times we can multiply p for itself before we get below 0.5.
+
+```{r}
+p = 0.95
+count = 0   # we start from 0 to avoid an extra count in the while loop
+while (p > 0.5) {
+  p = p * 0.95
+  count = count + 1
+}
+count
+```
+
+### Ex 2.16
+
+*Each day a hospital records the number of people who come to the emergency room for treatment*\
+*(a) In the first week, the observations from Sunday to Saturday are 10, 8, 14, 7, 21, 44, 60. Do you think that the Poisson distribution might describe the random variability of this phenomenon adequately. Why or why not?*\
+*(b) Would you expect the Poisson distribution to better describe, or more poorly describe, the number of weekly admissions to the hospital for a rare disease? Why?*
+
+**Solutions**
+
+a) The Poisson distribution fits this case because the event of coming to the emergency room can be seen as a Bernoulli trial with a very low probability of success, and the total population can be considered to be large
+b) Supposing that the disease is the same as above, we expect the event to be more poorly described by the Poisson distribution, since on a weekly basis the probability for a person to come to the emergency room grows. In the case that in a) we were instead considering the total number of hospitalized people (regardless of the cause) the Poisson distribution is probably better suited, since the probability of being hospitalized because of a specific rare disease is probably less than one seventh of the probability of being hospitalized for any disease
+
+### Ex 2.19
+
+*Lake Wobegon Junior College admits students only if they score above 400 on a standardized achievement test. Applicants from group A have a mean of 500 and a standard deviation of 100 on this test, and applicants from group B have a mean of 450 and a standard deviation of 100. Both distributions are approximately normal, and both groups have the same size.*\
+*(a) Find the proportion not admitted for each group.*\
+*(b) Of the students who are not admitted, what proportion are from group B?*\
+*(c) A state legislator proposes that the college lower the cutoff point for admission to 300, thinking that the proportion of not-admitted students who are from group B would decrease. If this policy is implemented, determine the effect on the answer to (b).*
+
+***Solution***
+
+a) We can use the R function for the cdf of the normal distribution to compute for each group the probability for their members to score below 400, which is equal to the proportion of not admitted students:
+```{r}
+pnA <- pnorm(400, mean = 500, sd = 100)
+pnB <- pnorm(400, mean = 450, sd = 100)
+pnA; pnB
+```
+
+b) We divide the proportion of not admitted students in group B by the total proportion of not admitted students:
+```{r}
+ppB <- pnB / (pnB + pnA)
+ppB
+```
+
+c) We can compute again the quantities of above changing the threshold for admission from 400 to 300, obtaining an even greater proportion of not admitted students from group B than in (b):
+```{r}
+pnA <- pnorm(300, mean = 500, sd = 100)
+pnB <- pnorm(300, mean = 450, sd = 100)
+ppB <- pnB / (pnB + pnA)
+ppB
+```
+
+### Ex 2.21
+
+*Plot the gamma distribution by fixing the shape parameter* $k$ *= 3 and setting the scale parameter = 0.5, 1, 2, 3, 4, 5. What is the effect of increasing the scale parameter?*
+
+**Solution**
+
+```{r}
+k <- 3      
+par(mfrow = c(1, 1))
+fun1= function(x) dgamma(x, shape = k, scale = 0.5)
+fun2= (function(x) dgamma(x, shape = k, scale = 1))
+fun3= (function(x) dgamma(x, shape = k, scale = 2))
+fun4= (function(x) dgamma(x, shape = k, scale = 3))
+fun5=(function(x) dgamma(x, shape = k, scale = 4))
+fun6= (function(x) dgamma(x, shape = k, scale = 5))
+
+curve(fun1, from = 0, to = 20, col = 'green')  # Draw Base R plot
+curve(fun2, from = 0, to = 20, col = 'red', add = TRUE)
+curve(fun3, from = 0, to = 20, col = 'purple', add = TRUE)
+curve(fun4, from = 0, to = 20, col = 'yellow', add = TRUE)
+curve(fun5, from = 0, to = 20, col = 'blue', add = TRUE)
+curve(fun6, from = 0, to = 20, col = 'black', add = TRUE)
+```
+When the parameter scale increases the distribution flattens (the variance increases) and its median and mean move towards larger values.
+
+### Ex 2.27
+
+*The distribution of* $X$ *= heights (cm) of women in the U.K. is approximately* $\mathcal{N}(162,\ 7^2)$. *Conditional on* $X = x$*, suppose* $Y$ *= weight (kg) has a* $\mathcal{N}(3.0+0.40x,\ 8^2)$ *distribution. Simulate and plot 1000 observations from this approximate bivariate normal distribution. Approximate the marginal means and standard deviations for* $X$ *and* $Y$*. Approximate and interpret the correlation.*
+
+**Solution**
+
+
+```{r}
+N <- 1000; mu.x <- 162; std.x <- 7; mu.y <- 3.0+0.4*mu.x; std.y <- 8
+x <- rnorm(N, mu.x, std.x)
+y <- rnorm(N, 3.0+0.4*x, std.y)
+
+# Estimation of marginal means, standard deviations and covariance:
+x.mean <- mean(x)
+y.mean <- mean(y)
+x.std <- sqrt(var(x))
+y.std <- sqrt(var(y))
+xy.cov <- cov(x,y)
+x.mean; y.mean; x.std; y.std; xy.cov
+
+# Estimation of the correlation coefficient:
+xy.mean <- mean(x*y)
+xx.mean <- mean(x*x)
+yy.mean <- mean(y*y)
+R <- (xy.mean-x.mean*y.mean)/( sqrt((xx.mean-x.mean*x.mean)*(yy.mean-y.mean*y.mean)) )
+R
+# Confront with the R function:
+cor(x,y)
+
+# We can recognize the confidence ellipse
+plot(x,y, xlab = "x", ylab = "y", type ="p", bg = "red", col="blue")
+
+# Plot the regression line, that is y = mu.y + R*(std.y/std.x)*(x-mu.x)
+curve(mu.y + R*(std.y/std.x)*(x-mu.x), col="dark green", add = TRUE); 
+abline(v=mu.x-2*std.x, col="violet"); abline(v=mu.x+2*std.x, col="violet");
+abline(v=mu.x-std.x, col="violet"); abline(v=mu.x+std.x, col="violet");
+abline(h=mu.y-std.y, col="violet"); abline(h=mu.y+std.y, col="violet");
+abline(h=mu.y-2*std.y, col="violet"); abline(h=mu.y+2*std.y, col="violet")
+```
+
+As we can see from the calculated values, both the covariance and the correlation coefficient are different from 0 and also positive. Since the correlation coefficient is always $\in [-1,1]$, it gives important information about the correlation of two random variables. In this particular case, we can see a positive correlation between the two random variables, that is the expected result. The same conclusion can be reached looking at the plotted graph.
+
+### Ex 2.43
+
+*Consider the exponential pdf* $f(y,\ \lambda)=\lambda e^{-\lambda y}$ *and cdf* $F(y,\ \lambda)=1-e^{-\lambda y}$*, for* $y\ge 0$.\
+*(a) Find the median.*\
+*(b) Find the lower quartile and the upper quartile.*\
+*(c) Find* $\mu$  *by showing that it equals* $1/ \lambda$ *times the integral of a gamma pdf. Explain why* $\mu$ *is greater than the median.*\
+*(d) Find* $\sigma$ *by finding* $E(Y^2)$ *using a gamma pdf and using expression (2.3)* ($var(Y) = \sigma^2 = E(Y^2) - \mu^2$).
+
+**Solution**
+
+a)The median ($p=0.5$) is given by
+$$
+q=F^{-1}(p)=\frac{-log(1-p)}{\lambda}=\frac{-log(1-0.5)}{\lambda}=\frac{-log(0.5)}{\lambda}=\frac{0.693}{\lambda} \
+$$
+
+b)For the lower quartile ($p=0.25$) we have
+$$
+q=F^{-1}(p)=\frac{-log(1-0.25)}{\lambda}=\frac{-log(0.75)}{\lambda}=\frac{0.288}{\lambda} \
+$$
+Instead, for the upper quartile ($p=0.75$):
+$$
+q=F^{-1}(p)=\frac{-log(1-0.75)}{\lambda}=\frac{-log(0.25)}{\lambda}=\frac{1.386}{\lambda} \
+$$
+c)We have to show that $\mu$ is equal to $\frac1{\lambda}$ times a gamma *pdf*: 
+$$
+\mu=\frac{1}{\lambda}\int_0^{\infty}\frac{\lambda^k}{\Gamma(k)}e^{-\lambda y}y^{k-1}dy
+$$
+We know that $\mu=\int_y yf(y)dy=\int_0^{\infty}y\lambda e^{-\lambda y}dy$ ;
+if we integrate we obtain that
+
+$$
+\int_0^{\infty}y\lambda e^{\lambda y}dy=\left. \frac{e^{-\lambda y}(1+\lambda y)}{\lambda} \right| _0^{\infty}=\frac{1}{\lambda}
+$$
+The integer of a *pdf* is always equal to 1, because it is the probability that a random variable falls in the internal in which it is defined.
+So we have that
+$$
+\mu=\int_y yf(y)dy=\int_0^{\infty}y\lambda e^{-\lambda y}dy=\frac1{\lambda}=\frac{1}{\lambda}\int_0^{\infty}\frac{\lambda^k}{\Gamma(k)}e^{-\lambda y}y^{k-1}dy
+$$
+$\mu$ is greater than the median because the exponential distribution is skewed to the right.
+
+d)The standard deviation can be estimate using the variance, which is defined as
+$$
+var(Y)=\sigma^2=E(Y^2)-\mu^2
+$$
+We have to calculate $E(Y^2)$, that is
+$$
+E(Y^2)=\int_y y^2f(y)dy=\int_0^{\infty}y^2\lambda e^{-\lambda y}dy=\int_0^{\infty}\frac{1}{\lambda^2}\lambda^2\lambda y^2 e^{-\lambda y}dy=\frac{1}{\lambda^2}\int_0^{\infty}\lambda^3 y^2e^{-\lambda y}dy=\frac{1}{\lambda^2}\Gamma(3)
+$$
+The gamma function with parameter $k=3$ is equal to 2
+$$
+\Gamma(3)=\int_0^{\infty}\lambda^3 y^2 e^{-\lambda y}dy=\lambda^3\frac{2}{\lambda^3}=2
+$$
+So we have that 
+$$
+E(Y^2)=\int_0^{\infty}\lambda y^2 e^{-\lambda y}dy=\frac{1}{\lambda^2}\Gamma(3)=\frac{2}{\lambda^2} 
+$$
+Now we can calculate $\sigma^2$
+$$
+\sigma^2=E(Y^2)-\mu^2=\frac{2}{\lambda^2}-\frac{1}{\lambda^2}=\frac{1}{\lambda^2}
+$$
+Finally, we obtain that the standard devoation $\sigma$ is
+
+$$
+\sigma= \sqrt{\sigma^2}=\sqrt{\frac1{\lambda^2}}=\frac1{\lambda}
+$$
+
+### Ex 2.52
+
+*The pdf* $f$ *of a* $\mathcal{N}(\mu,\ \sigma^2)$ *distribution can be derived from the standard normal pdf* $\phi$ *shown in equation (2.9)*  ($\phi(z)=\frac{1}{\sqrt{2\pi}}e^{-z^2/2}$).\
+*(a) Show that the normal cdf* $F$ *relates to the standard normal cdf* $\Phi$ *by* $F(y)=\Phi[(y-\mu)/\sigma]$.\
+*(b) From (a), show that* $f(y)=(1/\sigma)\phi[(y-\mu)/\sigma]$*, and show this is equation (2.8)* ($f(y,\ \mu,\ \sigma)=\big(\frac{1}{\sqrt{2\pi\sigma}} \big)e^{-(y-\mu)^2/2\sigma^2}$).
+
+**Solution**
+
+Let $X$ be a random variable such that $X\sim N(0,1)$. The c.d.f of $X$ is $\Phi(x)=Pr(X\leq x)$, and the pdf is $\phi(x)=\Phi^\prime(x)=\frac{\mathrm{d}\Phi(x)}{\mathrm{d}x}$. Now we can define another random variable $Y$ such that $Y=\mu + \sigma X$. In this way we have $Y\sim N(\mu,\sigma^2)$, since (for variables transformation rules) $E[Y]=\mu$ and $var(Y)=\sigma^2 var(X)=\sigma^2$.
+
+- The c.d.f of the variable $Y$ can be obtained substituting the expression above ($Y=\mu + \sigma X$), and using the definition of $\Phi$:
+$$
+F(y)=Pr(Y\leq y)=Pr(\mu+\sigma X \leq y)=Pr\left(X\leq \frac{y-\mu}{\sigma}\right)=\Phi\left(\frac{y-\mu}{\sigma}\right) .
+$$
+
+- The p.d.f of the variable $Y$ can be obtained taking the derivative of $F(y)$ (and applying the rule of the derivative of the composite function):
+$$
+f_y(y)=\frac{\mathrm{d}}{\mathrm{d}y}F(y)= \frac{\mathrm{d}}{\mathrm{d}y}\left[\Phi\left(\frac{y-\mu}{\sigma}\right)\right] =\frac{\mathrm{d}}{\mathrm{d}y}\left(\frac{y-\mu}{\sigma}\right)\Phi^\prime\left(\frac{y-\mu}{\sigma}\right) = \frac{1}{\sigma} \phi\left(\frac{y-\mu}{\sigma}\right) \ ,
+$$
+where $\phi$ is the p.d.f. of a standard normal distribution.
+
+### Ex 2.53
+
+*If* $Y$ *is a standard normal random variable, with cdf* $\Phi$*, what is the probability distribution of* $X = \Phi(Y)$*? Illustrate by randomly generating a million standard normal random variables, applying the cdf function* $\Phi()$ *to each, and plotting histograms of the (a)* $y$ *values, (b)* $x$ *values.*
+
+**Solution**
+
+```{r}
+y <- rnorm(1000000)
+x <- pnorm(y)
+par(mfrow = c(1, 2))
+hist.scott(y, xlab = 'y', main = 'histogram of y')
+hist.scott(x, xlab = 'x', main = 'histogram of x')
+```
+
+### Ex 2.67
+
+*For n observations* $\{y_i\}$*, let* $y_{(1)} \le y_{(2)} \le \dots \le y_{(n)}$ *denote their ordered values, called order statistics.*
+
+*Let* $q_i$ *be the* $i/(n + 1)$ *quantile of the standard normal distribution, for*  $i = 1,\ \dots \ ,\ n$ *.When* $\{y_i\}$ *are a random sample from a normal distribution, the plot of the points*$(q_1 , y_{(1)}),\ \dots ,\  (q_n , y_{(n)})$ *should approximately follow a straight line, more closely so when* $n$ *is large. This normal quantile plot is a special case of a quantile-quantile (Q-Q) plot.*\
+*(a) Randomly generate* $(i) n = 10, (ii) n = 100, (iii) n = 1000$ *observations from a* $\mathcal{N}(0,\ 1)$ *distribution and construct the normal quantile plot each time, using software such as the R functions* `rnorm` *and* `qqnorm`*. Note that as n increases the points cluster more tightly along the line* $y = x$*, which you can add to the plot with command* `abline(0, 1)`.\
+*(b) Randomly generate 1000 observations from a* $\mathcal{N}(100,\ 16^2)$ *distribution of IQ’s and construct the normal quantile plot. What is the slope of the line approximating these points?*\
+*(c) Randomly generate 1000 observations from the (i) exponential distribution (2.2), (ii) uniform distribution over (0, 1), using software such as the R functions* `rexp` *and* `runif`*. Construct the normal quantile plot in each case. Explain how they reveal the non-normality of the data.*\
+*(d) For case (ii) in (c), find appropriate uniform quantiles for which the Q-Q plot would be approximately linear. Construct the plot.*
+
+**Solution**
+
+a)
+```{r}
+y1 <- rnorm(10)
+y2 <- rnorm(100)
+y3 <- rnorm(1000)
+
+par(mfrow = c(1, 3))
+qqnorm(y1, col='blue', main='n=10 - N(0,1)'); abline(0,1)
+qqnorm(y2, col='blue', main='n=100 - N(0,1)'); abline(0,1)
+qqnorm(y3, col='blue', main='n=1000 - N(0,1)'); abline(0,1)
+```
+$$
+\
+$$
+As $n$ increases we can observe that the points are more close to the line *y=x*.
+
+b)
+```{r}
+x1 <- rnorm(1000, mean=100, sd=16^2)
+qqnorm(x1, col='blue', main='n=1000 - N(100,16^2)'); qqline(x1, lwd=2, col='red')
+```
+$$
+\
+$$
+The slope of the line is determined y the tandard deviation, so in this case is 16.
+
+c)
+```{r}
+x2 <- rexp(1000, 1)
+x3 <- runif(1000, 0, 1)
+
+par(mfrow = c(1, 2))
+qqnorm(x2, col='blue', main='exponential distribution'); qqline(x2,col='red')
+qqnorm(x3, col='blue', main='uniform distribution'); qqline(x3,col='red')
+```
+$$
+\
+$$
+The plot of the exponential distribution reflects the right skew typical of 
+that distribution, with some quite large observations and few small 
+observations.
+The plot of the uniform distribution indicates fewer observation in the
+tails than expected with the normal distribution.
+
+
+d) For the uniform distribution in the previous point of the exercise, we can note that between the quantiles 0.2 and 0.8 the Q-Q plot is approximately linear.
+```{r}
+x3 <- runif(1000, 0, 1)
+qqnorm(x3, col='blue', main='uniform approximated as linear', ylim=c(0.2, 0.8)); qqline(x3,col='red')
+```
+
+### Ex 2.69
+
+*For a sequence of independent, identical binary trials, explain why the probability distribution for* $Y$ *= the number of successes before failure number* $k$ *occurs has probability function*:
+$$f(y,\ k,\ \pi)=\binom{y+k-1}{y}\pi^y(1-\pi)^k \qquad y=0,\ 1,\ \dots$$
+*This distribution is called the* **negative binomial distribution**.
+
+**Solution**
+We want to find the probability distribution (mass function) of the random variable $Y=$ "number of successes before failure number $k$, in a series of Bernoulli trials. To do so, we refer to the Binomial distribution $B$($y$ = number of successes, $n=$ number of total trials, $p$ probability of each success). This distribution is given by:
+$$
+B(y,n,p)= \left(\begin{array}{c} y \\ n \end{array}\right)p^y(1-p)^{n-y} \ .
+$$
+In particular, the probability to obtain $y$ successes before the failure number $k$ is equal to the probability to obtain the $k$-th failure in the trial number $y+k$, and the probability to obtain $y$ successes and $k-1$ failures in the previous $y+k-1$ trials. If the probability to obtain a success is $p$, then the latter probability is given by:
+$$
+Pr(\ \text{y successes and k-1 failures}\ )=B(y,y+k-1)= \left(\begin{array}{c} y+k-1 \\ y \end{array}\right)p^y (1-p)^{k-1}
+$$
+If the probability to obtain a success is $p$, then, the probability to obtain a failure in the trial number $k$ is simply $(1-p)$. So, putting all together, we obtain the negative binomial $f(y,k,p)$, that gives the probability to obtain $y$ successes before the $k$-th failure:
+$$
+f(y,k,p)=B(y,y+k-1)B(0,1)= \left(\begin{array}{c} y+k-1 \\ y \end{array}\right)p^y (1-p)^{k-1}(1-p)= \left(\begin{array}{c} y+k-1 \\ y \end{array}\right)p^y (1-p)^{k} \ .
+$$
+
+### Ex 2.71
+
+*When* $Y$ *has positively skewed distribution over the positive real line, statistical analyses often treat* $X = \log{(Y)}$ *as having a* $\mathcal{N}(\mu,\ \sigma^2)$ *distribution. Then* $Y$ *is said to have the log-normal distribution.*\
+*(a) Derive an expression for the cdf* $G$ *of* $Y$ *in terms of the cdf* $F$ *of* $X$*, and take the derivative to obtain the pdf* $g$ *of* $Y$.\
+*(b) Use the information given in Exercise 2.66 about the mgf of a normal random variable to show that* $E(Y)=e^{\mu+\sigma^2/2}$ *and* $var(Y)=[e^{\sigma^2-1}][E(Y)]^2$*. As shown for the gamma distribution in Exercise 2.45, the log-normal has standard deviation proportional to the mean.*\
+*(c) Explain why the median of the distribution of* $Y$ *is* $e^{\mu}$*. What do the mean and median suggest about the skewness of the distribution?*
+*(d) For independent observations* $y_1,\ \dots ,\ y_n$ *from the log-normal, we could summarize the distribution by finding* $\overline{x}$ *for*  $\{x_i=\log{(y_i)}\}$ *and then using* $exp(\overline{x})$. *Show that* $exp(\overline{x}) = (\prod_i{y_i})^{1/n}$ *, the geometric mean of* $\{y_i\}$.
+
+**Solution**
+
+a)The logarithm is an increasing monotone function, so the *cdf* $G$ of $Y$ is
+$$
+cdf\hspace{0.3cm}G(y)=P(Y\leq y)=P[log(Y)\leq log(y)]=P[X\leq log(y)] =F[log(y)]
+$$
+The *pdf* $G$ of $y$ is
+$$
+pdf\hspace{0.3cm}g(y)=G'(y)=F'[log(y)]=\frac{1}{y}f[log(y)]=\frac{1}{y}(\frac{1}{\sqrt{2\pi}\sigma})e^{-\frac{(log(y)-\mu)^2}{2\sigma^2}}
+$$
+
+b)Given that $X=\log(Y)$, we have that $E(Y)=E(e^X)$, but this is exactly the *moment generating function* of $X$ for $t=1$.
+We know (from exercise 2.66) that the *mgf* for the normal distribution is $m(t)=e^{\mu t +\sigma^2t^2/2}$, so we can conclude that
+$$
+E(Y)=E(e^X)=m_X(t=1)=e^{\mu+\frac{\sigma^2}{2}} \
+$$
+Similarly, we can show that $var(Y)=[e^{\sigma^2}-1][E(Y)]^2$:
+$$
+var(Y)=E(Y^2)-E(Y)^2=E(e^{2x})-e^{2\mu+\sigma^2}=e^{2\mu+2\sigma^2}-e^{2\mu+\sigma^2}=e^{2\mu+\sigma^2}\left({e^{\sigma^2}-1} \right)
+$$
+c)The median of X is $\mu$, because X has a normal distribution and in that case the mean and the median have the same value. Given that the logarithm is an increasing monotone function, we can write that
+$$
+0.50=P(X\leq\mu)=P(log(Y)\leq\mu)=P(Y\leq e^\mu)=0.50
+$$
+So the median of $Y$ is $e^\mu$.
+The value of the median of Y is higher than the value of the median of X: this observation suggests that the log-normal distribution is more right skewed than the normal distribution.
+
+d)We have:
+$$
+\exp(\bar{x})=\exp\left[\frac{\sum_{i} log(y_i)}{n}\right]=\left(\exp\left[log\left(\prod_i y_i\right)\right]\right)^\frac{1}{n}=\left(\prod_i y_i \right)^\frac{1}{n}
+$$
+The result is the *geometric mean* of ${y_i}$
+
+## CS - Chapter 1 
+
+### Ex 1.1
+
+*Exponential random variable,* $X\ge0$*, has p.d.f.*$f(x) = \lambda\exp\{-\lambda x\}$.\
+*1. Find the c.d.f. and the quantile function for* $X$ *.*\
+*2. Find* $\Pr(X < \lambda)$ *and the median of* $X$ *.*\
+*3. Find the mean and variance of* $X$ *.*
+
+**Solution**
+
+Considering the exponential random variable, $X \geq 0$, with p.d.f. $f(x)=\lambda e^{-\lambda x}$, then: 
+
+-The cumulative density function is given by:
+$$
+F(x)=Pr(X\leq x)=\int_0^x f(t)\mathrm{d}t=\lambda\int_0^x e^{-\lambda t} \mathrm{d}t=\left.\lambda \left(-\frac{1}{\lambda}\right) e^{-\lambda t} \right|_0^x= 1-e^{-\lambda x} \ .
+$$
+The quantile function can be obtained inverting the c.d.f in this way:
+$$
+y=F(x)=1-e^{-\lambda x} \implies -\lambda x=\log(1-y) \implies x=-\frac{log(1-y)}{\lambda}=F^{-1}(y)
+$$
+$$
+\implies q(x)=F^{-1}(x)=-\frac{log(1-x)}{\lambda} \ .
+$$
+
+- The requested probability is:
+$$
+Pr(X<\lambda)=F(\lambda)=1-e^{-\lambda^2} \ .
+$$
+The median $m$ is given by definition:
+$$
+Pr(X\leq m)=F(m)=\int_{0}^m f(t)\mathrm{d}t=\frac{1}{2} \implies m=q\left(\frac{1}{2}\right)=-\frac{log(1/2)}{\lambda}=\frac{log(2)}{\lambda} \ .
+$$
+- The mean of $X$ is given by:
+$$
+\mathrm{mean}=E[X]=\int_0^{\infty} x \ \lambda e^{-\lambda x}\mathrm{d}x=[\text{... integrating by parts}]= \left.\left(-\frac{1}{\lambda}\right)e^{-\lambda x}\right|_0^{\infty}=\frac{1}{\lambda} \ .
+$$
+The variance is defined as: $var(X)=E[(X-E[X])^2]=E[X^2]-(E[X])^2= E[X^2]-1/\lambda^2$. Now we find $E[X^2]$ integrating again by parts:
+$$
+E[X^2]=\int_0^{\infty} \lambda e^{-\lambda x}x^2\ \mathrm{d}x=2\int_0^{\infty} e^{-\lambda x}x\ \mathrm{d}x=\frac{2}{\lambda}E[X]=\frac{2}{\lambda^2}
+$$
+$$
+\implies var(X)=E[X^2]-(E[X])^2=\frac{2}{\lambda^2}-\frac{1}{\lambda^2}=\frac{1}{\lambda^2} \ .
+$$
+
+### Ex 1.2
+
+*Evaluate* $\Pr(X < 0.5,\ Y < 0.5)$ *if* $X$ *and* $Y$ *have joint p.d.f. (1.2)* :
+
+$$f(x,\ y)=\begin{cases}x+3y^2/2 \ & \ 0<x<1 \ , &  0<y<1\\0 & \text{otherwise}            \end{cases}$$
+
+**Solution**
+
+The probability $P(X<0.5, Y<0.5)$ is given by:
+$$
+F(X=0.5, Y=0.5)=\int_0^{1/2}\int_0^{1/2} f(x,y) \ \mathrm{d}x\mathrm{d}y=\int_0^{1/2}\int_0^{1/2} x \ \mathrm{d}x\mathrm{d}y + \frac{3}{2}\int_0^{1/2}\int_0^{1/2} y^2 \ \mathrm{d}x\mathrm{d}=
+$$
+$$
+=\left. y \right|_0^{1/2} \ \left.\frac{x^2}{2}\right|_0^{1/2} + \frac{3}{2} \ \left.x\right|_0^{1/2} \  \left. \frac{y^3}{3}\right|_0^{1/2}=\frac{1}{16}+\frac{1}{32}=\frac{3}{32} \ .
+$$
+
+
+### Ex 1.6
+
+*Let* $X$ *and* $Y$ *be non-independent random variables, such that* $var(X) = \sigma^2_x,\ var(Y ) = \sigma^2_y$ *and* $cov(X,\ Y)=\sigma_{xy}$. *Using the result from Section 1.6.2, find* $var(X + Y)$ *and* $var(X - Y)$.
+
+**Solution**  
+The result from Section 1.6.2 states that: given a vector $V$ of random variables with covariance matrix $\Sigma$, and a matrix $A$ of finite real constants, the covariance matrix of the random vector $AV$ is $\Sigma_{AV} = A\Sigma A^T$. In the case of this exercise we can write:
+$$
+V = \left(\begin{array}{c} X \\ Y \end{array}\right) \ \  \text{and} \ \ AV = \left(\begin{array}{c} X + Y \\ X - Y \end{array}\right) \ \implies \  A = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} .
+$$
+So, from the result above we have:
+$$
+\Sigma_{AV} = A \Sigma A^T = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} \begin{pmatrix} \sigma_x^2 & \sigma_{xy} \\ \sigma_{xy} & \sigma^2_y \end{pmatrix}  \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} = \begin{pmatrix} \sigma_x^2 + \sigma_y^2 + 2\sigma_{xy} & \sigma^2_{x}-\sigma_y^2 \\ \sigma^2_{x}-\sigma_y^2 & \sigma^2_{x}+\sigma_y^2 -2\sigma_{xy} \end{pmatrix} \ .
+$$
+By definition the covariance matrix of the random vector $AV$ is:
+$$
+\Sigma_{AV} = \begin{pmatrix} var(X+Y) & cov(X+Y, X-Y) \\ cov(X+Y, X-Y) & var(X-Y) \end{pmatrix} \ .
+$$
+Comparing the two expressions we have finally:
+$$
+var(X+Y) = \sigma_x^2 + \sigma_y^2 + 2\sigma_{xy} \ , \ \ \text{and} \ \ var(X-Y) = \sigma^2_{x}+\sigma_y^2 -2\sigma_{xy} \ .
+$$
+
+### Ex 1.8
+
+*If* $log(X)\sim\mathcal{N}(\mu,\ \sigma^2)$*, find the p.d.f. of* $X$*.*
+
+**Solution**
+
+We have the random variable $Y=\log(X) \sim N(\mu,\sigma^2)$. The variable $Y$ is normally distributed, so the p.d.f is:
+$$
+f_y(y)=\frac{1}{\sqrt{2\pi}\sigma} \exp\left[-\frac{(y-\mu)^2}{2\sigma^2}\right] \ .
+$$
+The p.d.f of the variable $X$ is then:
+$$
+f_x(x)=f_y(log(x)) \left|{\frac{\mathrm{d}\log(x)}{\mathrm{d}x}}\right| = \frac{1}{\sqrt{2\pi}\sigma} \exp\left[-\frac{(\log{x}-\mu)^2}{2\sigma^2}\right]\left|\frac{1}{x}\right| =  \frac{1}{\sqrt{2\pi}\sigma|x|} \exp\left[-\frac{(\log{x}-\mu)^2}{2\sigma^2}\right] \ . 
+$$
+
+## CS - Chapter 3
+
+### Ex 3.3
+*Rewrite the following, replacing the loop with efficient code:* 
+
+```{r, eval=FALSE}
+n <- 100000; z <- rnorm(n)
+zneg <- 0;j <- 1
+for (i in 1:n) {
+    if (z[i]<0) {
+        zneg[j] <- z[i]
+        j <- j + 1
+    }
+}
+```
+*Confirm that your rewrite is faster but gives the same result.*
+
+**Solution**
+We've replaced the loop by initializing the vector *zneg* taking only the negative values of *z*.
+
+```{r}
+n <- 1000000
+z <- rnorm(n)
+zneg <- z[z < 0]
+```
+
+### Ex 3.5
+
+*Consider solving the matrix equation* $\boldsymbol{\mathbf{Ax=y}}$ *for* $\mathbf{x}$, $\mathbf{y}$ *is a known* $n$ *vector and* $\mathbf{A}$ *is a known* $n\times n$ *matrix. The formal solution to the problem is* $\mathbf{x=A^{-1}y}$*, but it is possible to solve the equation directly, without actually forming* $\mathbf{A}^{-1}$*. This question explores this direct solution. Read the help file for solve before trying it.*\
+*a. First create an* $\mathbf{A},\ \mathbf{x}$ *and* $\mathbf{y}$ *satisfying* $\mathbf{Ax = y}$*.*\
+```{r, eval=FALSE}
+set.seed(0); n <- 1000
+A <- matrix(runif(n*n),n,n); x.true <- runif(n)
+y <- A%*%x.true
+```
+*The idea is to experiment with solving* $\mathbf{Ax = y}$ for $\mathbf{x}$*, but with a known truth to compare the answer to.*\
+*b. Using* `solve`*, form the matrix* $\mathbf{A}^{-1}$ *explicitly and then form* $\mathbf{x}_1=\mathbf{A}^{-1}\mathbf{y}$. *Note how long this takes. Also assess the mean absolute difference between* $\mathbf{x}_1$ *and* `x.true` *(the approximate mean absolute ‘error’ in the solution).*\
+*c. Now use solve to directly solve for* $\mathbf{x}$ *without forming* $\mathbf{A}^{-1}$*. Note how long this takes and assess the mean absolute error of the result.*\
+*d. What do you conclude?*
+
+**Solution**
+
+a)
+```{r}
+set.seed(0)
+n <- 1000
+A <- matrix(runif(n*n),n,n)
+x.true <- runif(n)
+y <- A %*% x.true
+```
+b)
+```{r}
+system.time(A.in <- solve(A))
+system.time(x1 <- A.in %*% y)
+system.time(diff1 <- sum(abs(x1 - x.true)) / n)
+diff1
+```
+c)
+```{r}
+system.time(x2 <- solve(A, y))
+system.time(diff2 <- sum(abs(x1 - x.true)) / n)
+diff2
+```
+d) We observe that, while the two methods are equally accurate in computing x, the time taken for the computation is definitely greater in b). Since (as we can see from the results) the substantial difference in time is in the execution of the solve() function, probably the difference is caused by the fact that, while in c) the known term is a vector, in b) it is a matrix (the identity), so the number of operations to be performed is much larger.
+
+
+### Ex 3.6
+
+*The empirical cumulative distribution function for a set of measurements* $\{x_i:i=1,\ \dots,\ n\}$ *is*:
+$$\hat{F}(x)=\frac{\#\{x_i < x\}}{n}$$
+*where* $\#\{x_i<x\}$ *denotes ‘number of* $x_i$ *values less than* $x$*’. When answering the following, try to ensure that your code is commented, clearly structured, and tested. To test your code, generate random samples using* `rnorm`*,* `runif`*, etc.*\
+*a. Write an* `R` *function that takes an unordered vector of observations* `x` *and returns the values of the empirical c.d.f. for each value, in the order corresponding to the original* `x` *vector. See* `?sort.int`.\
+*b. Modify your function to take an extra argument plot.cdf, that when* `TRUE` *will cause the empirical c.d.f. to be plotted as a step function over a suitable* $x$ *range.*
+
+**Solution**
+
+We use the function sort.int() to sort the sample; setting index.return = TRUE, as output we get a list of two (called ordered), in which the first element is the sorted sample and the second one is a list of indexes recording in what position the ordered elements were in the starting sample. We then use the position (indicated by the variable i) of the various elements in the ordered sample to compute the empirical cdf, and the indexes stored in ordered[[2]] to put the computed values in the right position.
+
+```{r}
+# function
+compute_distribution <- function(x, plot.cdf) {
+  
+  ordered <- sort.int(x, index.return = TRUE)   # sorting the sample
+  
+  N <- length(ordered[[1]])
+  d <- rep(0, N)   # vector to store empirical cdf values
+  
+  for (i in 1:N) {
+    d[ordered[[2]][i]] <- (i-1) / N   # building the cdf
+  }
+  
+  # plotting
+  if (plot.cdf == T) {
+    plot(ordered[[1]], d[ordered[[2]]], type = 's', xlab = 'x', main = 'emp. dcf')
+  }
+  
+  return(d)
+}
+```
+
+```{r}
+# testing the function
+par(mfrow = c(1, 2))
+d <- compute_distribution(rbeta(1000, 5, 1), plot.cdf = TRUE)
+plot(function(x) pbeta(x, 5, 1), main = 'cdf')
+par(mfrow = c(1, 2))
+d <- compute_distribution(rnorm(1000, 3, 2), plot.cdf = TRUE)
+plot(function(x) pnorm(x, 3, 2), main = 'cdf', xlim = c(-4, 10))
+par(mfrow = c(1, 2))
+d <- compute_distribution(runif(1000, 0, 10), plot.cdf = TRUE)
+plot(function(x) punif(x, 0, 10), main = 'cdf', xlim = c(0, 10))
+```

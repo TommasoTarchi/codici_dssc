@@ -1,0 +1,149 @@
+---
+title: "lab1"
+author: "tommaso tarchi"
+date: "2022-10-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## plot e calcolo delle statistiche
+
+La funzione plot crea il nuovo plot, curve (con add = TRUE) aggiunge curve al plot esistente:
+
+```{r gamma density distribution}
+# gamma density distribution
+alpha <- 2
+theta <- 2
+z <- seq(0, 5, 0.01)
+
+plot(z, dgamma(z, shape = alpha, rate = theta), xlim = c(0, 5), ylab = "f(x)", ylim=c(0,2), type = 'l')
+curve(dgamma(x, shape = 1, rate = theta), col = "red", lty = "dashed", add = TRUE)
+curve(dgamma(x, shape = alpha, rate = 1), col = "blue", lty = "dashed", add = TRUE)
+```
+
+Alternativamente a definire il vettore delle x posso usare direttamente la funzione function():
+
+chiarire perché devo usare x in curve e non y
+
+```{r function function()}
+plot(function(y) dgamma(y, shape = alpha, rate = theta), xlim = c(0, 5), ylab = "f(x)", ylim=c(0,2), type = 'l')
+curve(dgamma(x, shape = 1, rate = theta), col = "red", lty = "dashed", add = TRUE)
+curve(dgamma(x, shape = alpha, rate = 1), col = "blue", lty = "dashed", add = TRUE)
+```
+
+```{r gamma cumulative distribution}
+# gamma cumulative distribution
+plot(z, pgamma(z, shape = alpha, rate = theta), xlim = c(0, 5), ylab = "F(x)", type = 'l')
+curve(pgamma(x, shape = 1, rate = theta), col = "red", lty = "dashed", add = TRUE)
+curve(pgamma(x, shape = alpha, rate = 1), col = "blue", lty = "dashed", add = TRUE)
+```
+
+```{r gamma probability}
+# gamma probability P(X < 3) with shape alpha and rate theta
+pgamma(3, shape = alpha, rate = theta)
+```
+
+```{r gamma quartiles}
+# gamma first quartile...
+q25 = qgamma(0.25, shape = alpha, rate = theta)
+q25
+# ...and third one
+q75 = qgamma(0.75, shape = alpha, rate = theta)
+q75
+```
+
+La funzione segments permette di collegare due punti su un plot:
+
+```{r quantiles on cdf}
+# quantiles on the cdf
+plot(z, pgamma(z, shape = alpha, rate = theta), xlim = c(0, 5), ylab = "F(x)", type = 'l')
+
+segments(q25, 0, q25, pgamma(q25, shape = alpha, rate = theta), col = "blue", lty = "dashed")
+segments(0, pgamma(q25, shape = alpha, rate = theta), q25, pgamma(q25, shape = alpha, rate = theta), col = "blue", lty = "dashed")
+
+segments(q75, 0, q75, pgamma(q75, shape = alpha, rate = theta), col = "blue", lty = "dashed")
+segments(0, pgamma(q75, shape = alpha, rate = theta), q75, pgamma(q75, shape = alpha, rate = theta), col = "blue", lty = "dashed")
+```
+
+```{r gamma distributed random numbers}
+# random numbers distributed according to a gamma
+set.seed(1111)
+
+x <- rgamma(10000, shape = alpha, rate = theta)
+hist(x, prob = TRUE, nclass = 40)
+curve(dgamma(x, alpha, theta), col = "red", lty = "dashed", add = TRUE)
+```
+
+```{r relationaship between negative normal and geometric distributions}
+# given r iid distributed according to a geometric distribution, the variable defined as te sum of these variables is distributed as a negative normal
+n <- 10000
+r <- 5 
+p <- 0.7
+
+set.seed(13)
+x <- rnbinom(n, r, p)
+y <- rep(0, n)
+
+for(i in 1 : n){
+ y[i] <- sum(rgeom(r, p))
+}
+
+ltx <- length(table(x)) 
+lty <- length(table(y))
+
+relf <- matrix(0, 2, max(ltx, lty))
+relf[1, 1 : ltx] <- round(table(x)/n, 3)
+relf[2, 1 : lty] <- round(table(y)/n, 3)
+colnames(relf) <- 0 : (max(ltx, lty)-1)
+
+relf
+
+barplot(relf, beside=FALSE ,col=c("red", "green"))
+legend("topright", c("NegBin","SumGeo"), fill = c("red","green"))
+
+barplot(relf, beside=TRUE ,col=c("red", "green"))
+legend("topright", c("NegBin","SumGeo"), fill = c("red","green"))
+```
+
+par() divide la zona per i grafici in una griglia in cui poter inserire più di un grafico:
+
+```{r side by side comparison}
+p <- 0.3
+
+par(mfrow = c(1, 2))
+
+plot(0 : 10, dgeom(0 : 10, p), xlim = c(0, 10), ylim = c(0, 1), xlab = "x",ylab = "P(X=x)")
+plot(0 : 10, pgeom(0 : 10, p), xlim = c(0, 10), ylim = c(0, 1), type = "s",xlab = "x", ylab = "F(x)")
+```
+
+```{r sample mean vs expected value}
+par(c(1, 1))
+
+# sample mean vs expected value for geometric distribution
+set.seed(1)
+samp <- rgeom(1000, p)
+
+#sample mean
+mean(samp)
+
+# expected value
+(1 - p) / p
+```
+
+## monte carlo simulation
+
+```{r}
+R <- 1000
+theta<- 2
+
+x <- rep(0,R)
+for(i in 1 : R) {
+  u <- runif(1, 0, 1)
+  x[i] <- -log(u) / theta
+}
+hist(x, prob = TRUE, breaks = 30)
+curve(dexp(x, theta), from = 1e-16, to = 4, add = T, col = "red")
+```

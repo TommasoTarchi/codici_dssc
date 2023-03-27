@@ -1,0 +1,412 @@
+---
+title: "GroupJ_HM4"
+author: "M. Alessi, S. Candussio, N. Perin, T. Tarchi"
+date: "2023-1-9"
+output:
+  html_document:
+    toc: yes
+    toc_depth: '3'
+    df_print: paged
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\newpage
+
+## FSDS - Chapter 7
+
+
+### Ex 7.4
+
+*Analogously to the previous exercise, randomly sample* $30\ X$ *observations from a uniform in the interval* $(-4,4)$ *and conditional on* $X = x$, $30$ *normal observations with* $E(Y) = 3.5x^3-20x^2 + 0.5x + 20$ *and* $\sigma = 30$*. Fit polynomial normal GLMs of lower and higher order than that of the true relationship. Which model would you suggest? Repeat the same task for* $E(Y) = 0.5x^3- 20x^2 + 0.5x + 20$ *(same* $\sigma$*) several times. What do you observe? Which model would you suggest now?*
+
+**Solution**
+
+Firstly, we consider a normal observations with $E(Y) = 3.5x^3 -20x^2 + 0.5x + 20$ and $\sigma = 30$:
+
+```{r}
+x <- runif(n = 30, min = -4, max = 4)
+y <- rnorm(x, mean = 3.5*x^3 - 20*x^2 + 0.5*x + 20, sd = 30)
+plot(x, y, pch=16, cex=1.5)
+
+fit0 <- lm(y ~ x + I(x^2))
+fit1 <- lm(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5))
+
+pred0 <- predict(fit0)
+pred1 <- predict(fit1)
+
+ix <- sort(x, index.return=T)$ix
+lines(x[ix], pred0[ix], col='red', lwd=2)
+lines(x[ix], pred1[ix], col='blue', lwd=2)
+```
+According to Occam's razor principle, even if the blue line clearly better follows the data, we could prefer the less complex polynomial model.
+
+
+Then we just consider a normal with a different mean expression ($E(Y) = 0.5x^3 - 20x^2 + 0.5x + 20$). It is asked to repeat this process many times:
+
+```{r}
+par(mfrow=c(1,3))
+for(i in 1:3){
+  
+  x <- runif(n = 30, min = -4, max = 4)
+  y <- rnorm(x, mean = 0.5*x^3 - 20*x^2 + 0.5*x + 20, sd = 30)
+  plot(x, y, pch=16, cex=1.5)
+
+  fit0 <- lm(y ~ x + I(x^2))
+  fit1 <- lm(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5))
+
+  pred0 <- predict(fit0)
+  pred1 <- predict(fit1)
+
+  ix <- sort(x, index.return=T)$ix
+  lines(x[ix], pred0[ix], col='red', lwd=2)
+  lines(x[ix], pred1[ix], col='blue', lwd=2)
+  
+}
+
+```
+
+In this example there's not a big difference between a 2nd degree polynomial and a 5th degree polynomial. They are almost coincident in some parts.
+
+### Ex 7.20
+
+*In the *`Crabs` *data file introduced in Section 7.4.2, the variable y indicates whether a female horseshoe crab has at least one satellite (1 = yes, 0 = no). * \
+$(a)$ *Fit a main-effects logistic model using weight and categorical color as explanatory variables. Conduct a significance test for the color effect, and construct a 95% confidence interval for the weight effect.*\
+$(b)$ *Fit the model that permits interaction between color as a factor and weight in their effects, showing the estimated effect of weight for each color. Test whether this model provides a significantly better fit.*\
+$(c)$ *Use AIC to determine which models seem most sensible among the models with* $(i)$ *interaction,* $(ii)$ *main effects,* $(iii)$ *weight as the sole predictor,* $(iv)$ *color as the sole predictor, and* $(v)$ *the null model.*
+
+
+$(a)$
+Load the data and create a logistic regression model
+```{r}
+Crabs <- read.table("http://stat4ds.rwth-aachen.de/data/Crabs.dat", header=TRUE)
+main_effects_model <- glm(y ~ factor(color) + weight, family = binomial(link = "logit"), data = Crabs)
+
+summary(main_effects_model)
+```
+From the summary we can see that weight is the only predictor with a high positive coefficient. This means that a one unit (one kg) increase in weight will increase the probability of y being 1 rather than 0.
+
+Conduct a significance test for the color effect
+```{r}
+anova(main_effects_model, test = "Chisq")
+```
+Construct a 95% confidence interval for the weight effect
+```{r}
+exp(confint(main_effects_model, level = 0.95))
+```
+
+$(b)$
+Fit the interaction model
+```{r}
+interaction_model <- glm(y ~ weight + factor(color) + factor(color) * weight, family = binomial(link = "logit"), data = Crabs)
+```
+Compare the deviances of the two models using a chi-squared test
+```{r}
+anova(main_effects_model, interaction_model, test = "Chisq")
+```
+In this case the p-value of the likelihood ratio test is greater than 0.05, so we can say that the interaction term doesn't have a significant effect on the response. A simpler model is to be preferred if it isn't worse that a more complicated one.
+
+Estimate the effect of weight for each color
+```{r}
+summary(interaction_model)
+```
+The coefficient for the interaction term can be interpreted as the effect of one predictor variable on the response variable, conditional on the value of the other predictor variable. In this case, the estimate for weight:factor(color)i represents the effect of weight on the response variable, conditional on color being at level i = 2,3,4.
+
+$(c)$
+```{r}
+main_effects_model <- glm(y ~ factor(color) + weight, family = binomial(link = "logit"), data = Crabs)
+
+interaction_model <- glm(y ~ factor(color) * weight, family = binomial(link = "logit"), data = Crabs)
+
+weight_model <- glm(y ~ weight, family = binomial(link = "logit"), data = Crabs)
+
+color_model <- glm(y ~ factor(color), family = binomial(link = "logit"), data = Crabs)
+
+null_model <- glm(y ~ 1, family = binomial(link = "logit"), data = Crabs)
+
+AIC(main_effects_model, interaction_model, weight_model, color_model, null_model)
+
+```
+As we can see, the model with weight alone hase $AIC=199.7$, which is close to that of the main-effects model and the interaction model. On the other hand, the model using color alone has $AIC=220$, which is close to that of the null model. We can conclude that weight is likely the only relevant factor that determines the number of satellites.
+
+
+### Ex 7.26
+
+*A headline in *`The Gainesville` *Sun (Feb. 17, 2014) proclaimed a worrisome spike in shark attacks in the previous two years. The reported total number of shark attacks in Florida per year from 2001 to 2013 were 33, 29, 29, 12, 17, 21, 31, 28, 19, 14, 11, 26, 23. Are these counts consistent with a null Poisson model? Explain, and compare aspects of the Poisson model and negative binomial model fits.*
+
+
+**Solution**
+
+In a null model we have a constant linear predictor, that is all of the $\mu_i$'s are equal. For instance, in this case (we chose a logarithmic link function, but it would be similar with any other link function) they will all be equal to $e^{\eta}$, with $\eta$ linear predictor; therefor all the $Y$'s will be distributed according to the same Poisson distribution.
+
+We can have a rough idea about whether the data seem to follow a Poisson distribution giving a look at the Q-Q plot built using the sample mean as an estimate of the theoretical distribution's parameter:
+```{r}
+attacks <- c(33, 29, 29, 12, 17, 21, 31, 28, 19, 14, 11, 26, 23)
+s.mean <- mean(attacks)
+
+attacks.ord <- rbind(unique(sort(attacks)), c(1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1))
+attacks.perc <- rep(0, 12)
+for (i in 1:12) {
+  attacks.perc[i] <- sum(attacks.ord[2, 1:i-1])/12
+}
+
+plot(function(x) x, xlim = c(10, 35), ylim = c(10, 35), xlab = "theoretical quantiles",
+     ylab = "empirical quantiles")
+points(qpois(attacks.perc[2:12], s.mean), attacks.ord[1, 2:12])
+```
+
+We can also perform a $\chi^2$ test:
+```{r}
+attacks.uniq <- unique(attacks)
+attacks.freq <- c(1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)  # added 0 for 'other' probabilities
+
+prob <- dpois(attacks.uniq, lambda = s.mean, log = F)  # theoretical probabilities
+comp <- 1 - sum(prob)  # 'other' probabilities
+
+chisq.test(attacks.freq, p = c(prob, comp), simulate.p.value = TRUE)
+```
+
+The deviation from the theoretical distribution is pretty apparent from both the plot and the test.
+
+This deviation is also suggested by the fact that sample mean and sample variance are quite different (while for a Poisson they should be equal):
+```{r}
+s.mean; var(attacks)
+```
+
+We now build the Poisson and the negative binomial null models:
+```{r}
+data <- data.frame(attacks = attacks)
+
+model.pois <- glm(attacks ~ 1, data = data, family = poisson(link = "log"))
+summary(model.pois)
+```
+```{r}
+library(MASS)
+```
+```{r}
+model.nb <- glm.nb(attacks ~ 1, data = data, link = log)
+summary(model.nb)
+```
+Comparing the Akaike information criteria, we can see that the negative binomial model gives a better description of the data. In fact, despite the usual definition of a negative binomial variable as the number of failures needed to achieve a certain number of successes, this distribution is often used to model overdispersed Poissons; so it is reasonable that it works better in our case.
+
+We can finally look at the Q-Q plot and the $\chi^2$ test for the negative binomial, estimating its parameters from the sample:
+```{r}
+# estimating parameters for the negative binomial
+p <- s.mean / var(attacks)
+r <- as.integer(s.mean**2 / (var(attacks)-s.mean))
+
+plot(function(x) x, xlim = c(10, 35), ylim = c(10, 35), xlab = "theoretical quantiles",
+     ylab = "empirical quantiles")
+points(qnbinom(attacks.perc[2:12], size = r, prob = p), attacks.ord[1, 2:12])
+```
+```{r}
+prob <- dnbinom(attacks.uniq, size = r, prob = p, log = F)  # theoretical probabilities
+comp <- 1 - sum(prob)  # 'other' probabilitie
+
+chisq.test(attacks.freq, p = c(prob, comp), simulate.p.value = TRUE)
+```
+
+We see that, although still not good enough, the negative binomial is definitely more appropriate to describe our data than the Poisson.
+
+
+### Ex 7.28
+
+*For the* `Students` *data file, model y = whether you are a vegetarian with the 14 binary/categorical and quantitative explanatory variables.* \
+$(a)$ *For ordinary logistic regression, show that this model fits better than the null model, but no Wald tests are significant.*\
+$(b)$ *Use the lasso, with* $\lambda$ *to minimize the sample mean prediction error in cross-validation. Compare estimates to those from ordinary logistic regression.*\
+$(c)$ *Specify the range of* $\lambda$ *values for which the lasso smoothing generates the null model.*
+
+
+**Solution**
+
+We have decided to exclude some qualitative variables whose are not categorical such as *affil* (political affilation). We considered instead categorical variables *ideol* and *relig* since they have some sort of implicit order inside their possible determinations. 
+
+```{r}
+Students <- read.csv("./Students.dat", sep="")
+
+Students <- Students[,c(2:12, 14, 15:17)]
+Students$gender <- as.factor(Students$gender)
+Students$veg <- as.factor(Students$veg)
+Students$ideol <- as.factor(Students$ideol)
+Students$relig <- as.factor(Students$relig)
+Students$abor <- as.factor(Students$abor)
+Students$affirm <- as.factor(Students$affirm)
+
+summary(Students)
+```
+$(a)$
+We try to model whether a student is vegetarian with respect to all the other variables in the case of an ordinary logistic regression: 
+
+```{r}
+fitLog <- glm(veg ~., family=binomial(link=logit), data=Students)
+summary(fitLog)
+```
+
+As we can expect from the warning, we attempt to fit a logistic regression model in R and we experience perfect separation: a predictor variable is able to perfectly separate the response variable into 0’s and 1’s.
+From the Agresti book: 
+*For logistic regression, infinite estimates occur when the space of explanatory variable values exhibits complete separation, in which a plane (or a line in the case of a single explanatory variable) can perfectly separate cases having* $y = 1$ *from cases having* $y = 0$. 
+
+Is this model worse than the null model? No, since we can compute the p-value of\
+`5.0725e+01 - 1.1664e-08 = 50.725` with `59 - 33 = 26 df`: 
+```{r}
+pchisq(50.725, 26, lower.tail = FALSE)
+```
+Since this p-value is much less than `0.05`, we would conclude that the model is highly useful.
+
+No Wald test is significant, since for these data, the true $\beta_j = 	+\infty$. In such a case, Wald inference is useless, but likelihood-ratio tests are still available. 
+
+
+$(b)$
+
+To determine what value to use for $\lambda$, we’ll perform k-fold cross-validation and identify the lambda value that produces the lowest test mean squared error (MSE).
+
+```{r}
+library(glmnet)
+
+y <- Students$veg #define the response variable
+x <- data.matrix(Students[, c('gender', 'age', 'hsgpa', 'cogpa', 
+                              'dhome', 'dres', 'tv', 'sport', 'news',
+                              'aids', 'ideol', 'relig', 'abor', 'affirm')]) 
+#define matrix of predictor variables
+
+set.seed(1) # a random seed to implement cross-validation
+
+cv_model <- cv.glmnet(x, y, alpha = 1, family="binomial") # alpha=1 selects lasso
+#cv.glmnet() automatically performs k-fold cross validation using k = 10 folds
+
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+best_model <- glmnet(x, y, alpha = 1, lambda = best_lambda, family="binomial")
+coef(best_model)
+```
+Where `.` indicates that the coefficient is shrunk to 0 because not really significant. 
+
+We can compare those estimates with the ones we obtain in an ordinary logistic regression: 
+
+```{r, echo=FALSE}
+options(scipen=999)
+fitLogCoefs <- c(coefficients(fitLog)[1], coefficients(fitLog)[2:11], mean(coefficients(fitLog)[12:17]), mean(coefficients(fitLog)[18:20]), coefficients(fitLog)[21], coefficients(fitLog)[22])
+
+bestModelCoefs <- coef(best_model)
+
+cbind(bestModelCoefs, fitLogCoefs)
+
+options(scipen=0)
+```
+From the Agresti book: 
+*Unless* $n$ *is very large, by ordinary sampling variability, the ML estimates* $\{\hat{\beta_j}\}$ *tend to be much larger in absolute value than the true values. This tendency is exacerbated when we consider only statistically significant values. Shrinkage toward* $0$ *tends to move the ML estimates closer to the true values. This is yet another example of the bias/variance tradeoff. Introducing a penalty function sometimes increases bias but can benefit from reduced variance.*
+
+$(c)$
+*Specify the range of* $\lambda$ *values for which the lasso smoothing generates the null model.*
+
+```{r, echo=FALSE}
+generic_model <- glmnet(x, y, alpha = 1, family="binomial")
+plot(generic_model, "lambda", lwd=1.5)
+```
+This picture shows how the lasso estimates change as the smoothing parameter $\lambda$ increases, on the log scale. The values at the left end of the plot, with the smallest shown value for $log(\lambda)$, are very close to the ML estimates, for which $\lambda = 0$.
+
+If $log(\lambda) \geq -2 \Rightarrow \lambda \geq 0.135$, all coefficients are shrunk to $0$, which means that the model is equivalent to a null model. 
+
+### Ex 7.42
+
+*For modeling the horseshoe crab satellite counts, the se values for the Poisson model output in* **Section 7.4.2** *are less than half the se values for the negative binomial model output in* **Section 7.5.3.** *Does this imply that the Poisson model is preferable? Explain.*
+
+
+**Solution**
+
+In general, a model with smaller SE values for the coefficients is preferred, because it indicates that the estimates of the coefficients are more precise and reliable. However, the choice of the best model for a given dataset depends on other factors as well, such as the fit of the model. In this case for example, we can see that the AIC values are 758 for the negative binomial model and 917 for the Poisson model: this suggests that assuming a Poisson response distribution is not appropriate.
+ 
+ 
+### Ex 7.44
+
+*For a sequence of independent binary trials,* **Exercise 2.69** *showed the probability distribution of *$Y =$ *the number of successes before the kth failure. Show that this distribution is a special case of the negative binomial distribution (7.7), for* $\pi = \mu/(\mu + k)$*. (The geometric distribution is the special case k = 1.)*
+
+
+**Solution**
+
+We want to prove that the distribution:
+$$
+f(y;k,\pi) = \binom{y+k-1}{y}\pi^y(1-\pi)^k
+$$
+is a special case of the negative binomial distribution:
+$$
+p(y;\mu,k) = \frac{\Gamma(y+k)}{\Gamma(k)\Gamma(y+1)} \left(\frac{\mu}{\mu+k}\right)^y \left(\frac{k}{\mu+k}\right)^k,
+$$
+with $\pi=\frac{\mu}{\mu+k}$.
+
+Remembering the expression $\Gamma(n)=(n-1)!$ and redefining $\frac{\mu}{\mu+k} = \pi$, we have:
+$$
+p(y;\mu,k) = \frac{(y+k-1)!}{(k-1)!y!} \pi^y \left(\frac{\mu+k}{\mu+k}-\frac{\mu}{\mu+k}\right)^k =
+\binom{y+k-1}{y}\pi^y(1-\pi)^k = f(y;k,\pi).
+$$
+ 
+ 
+
+## FSDS - Chapter 8
+
+
+### Ex 8.4
+
+*Refer to* **Exercise 8.1** *. Construct a classification tree, and prune strongly until the tree uses a single explanatory variable. Which crabs were predicted to have satellites? How does the proportion of correct predictions compare with the more complex tree in* **Figure 8.2?**
+
+
+**Solution**
+
+Load data:
+```{r}
+Crabs <- read.table("http://stat4ds.rwth-aachen.de/data/Crabs.dat", header=TRUE)
+```
+
+First step: build an over fitting tree with all the predictive variables available (we use a low value of `cp` and set `minsplit` and `minbucket` to $1$):
+```{r}
+library(rpart)
+library(rpart.plot)
+fit <- rpart(y ~ weight + width + color + spine, method="class", parms = list(split="gini") ,data=Crabs,
+                control = rpart.control(cp=.0000002, minsplit = 1, minbucket = 1, maxdepth = 30, xavl=10))
+
+
+rpart.plot(fit, cex=.2)
+```
+Now we start to prune the tree: at this step, we use `printcp` and `plotcp` to find the most suitable value for `cp`:
+```{r}
+printcp(fit)
+plotcp(fit)
+```
+We found a value for `cp` that is $0.025$. So at this step we increase `cp`; this will prune our tree:
+```{r}
+fit = prune(fit, cp=0.025)
+
+rpart.plot(fit, extra = 1)
+```
+By increasing `cp` parameter, we get new tree with less nodes than the previous one:
+```{r}
+fit = prune(fit, cp=0.08)
+
+rpart.plot(fit, extra = 1)
+```
+At this final step, we get this tree
+```{r}
+fit = prune(fit, cp=0.09)
+
+rpart.plot(fit, extra = 1)
+```
+The crabs with carapace width > 26 are predicted to have satellites; the ones with carapace width < 26, no.
+The proportion of correct prediction is $(44+77)/173 = 0.699$. We can compute it as:
+```{r}
+t_pred = predict(fit,Crabs,type="class")
+
+
+confMat <- table(Crabs$y,t_pred)
+
+confMat
+print(paste("accuracy is:",mean(Crabs$y == t_pred)))
+```
+The correct proportion for the example was: $(26+6+21+77)/173 = 0.75$; this is better, since we have more nodes in the trees. For the second tree in the example we have: $(26+23+77)/173 = 0.72$. With only one variable, the accuracy is worse.
+
+

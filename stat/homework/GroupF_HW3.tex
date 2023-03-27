@@ -1,0 +1,818 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={GroupF\_HM3},
+  pdfauthor={E. Malcapi, M. Pronestì, S. Brusatin, T. Tarchi},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{GroupF\_HM3}
+\author{E. Malcapi, M. Pronestì, S. Brusatin, T. Tarchi}
+\date{2022-12-11}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\hypertarget{fsds---chapter-4}{%
+\subsection{FSDS - Chapter 4}\label{fsds---chapter-4}}
+
+\hypertarget{ex-4.24}{%
+\subsubsection{Ex 4.24}\label{ex-4.24}}
+
+\emph{Refer to the vegetarian survey result in Exercise 4.6, with }
+\(n\) \emph{= 25 and no vegetarians.}\\
+\((a)\) \emph{Find the Bayesian estimate of} \(\pi\) \emph{using a beta
+prior distribution with} \(\alpha = \beta\) \emph{equal:} \((i)\)
+\emph{0.5,} \((ii)\) \emph{1.0,} \((iii)\) \emph{10.0.}\\
+\emph{Explain how the choice of prior distribution affects the posterior
+mean estimate.}\\
+\((b)\) \emph{If you were planning how to take a larger survey from the
+same population, explain how you can use the posterior results of the
+previous survey with} \(n\) \emph{= 25 based on the prior with}
+\(\alpha = \beta = 1\) \emph{to form the prior distribution to use with
+the new survey results.}
+
+\textbf{Solution}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  According to Bayes' theorem, \(\pi(p |x) \propto \pi(p)L(p)\). Since
+  we are dealing with a proportion, it is reasonable to assume a
+  Binomial likelihood, \(L(p) \propto p^x(1-p)^{n-x}\), and a Beta
+  distribution as prior distribution, since its support is \([0,1]\).\\
+  Therefore, \[
+  \pi(p |x) \propto \pi(p)L(p) \propto p^x(1-p)^{n-x}p^{\alpha -1}(1-p)^{\beta -1} \\
+  \propto p^{\alpha + x -1 }(1-p)^{\beta + n -x -1}           
+  \] This implies that the posterior distribution is still a Beta
+  distribution with parameters \(\alpha + x\) and \(\beta +n-x\). \[
+  \pi(p|x)= \frac{\Gamma(\alpha + \beta +n)}{\Gamma(\alpha+x)\Gamma(\beta+n-x)}p^{\alpha + x - 1}(1-p)^{\beta +n -x-1}
+  \] In order to obtain the Bayesian estimate of \(\pi\), i.e., the
+  proportion of vegetarian people in the population, we can use the mean
+  of the posterior distribution which is equal to \[
+  E(P|x)=\frac{\alpha + x}{\alpha + \beta + n}= \frac{\alpha + \beta}{\alpha + \beta + n}E_{\pi}(P) \ + \ \frac{n}{\alpha + \beta + n} \hat{p}_{ML}
+  \] In our case, \(n=25\) and \(x=0\), so
+\end{enumerate}
+
+\emph{i)} if \(\alpha=\beta=0.5\), i.e., we are considering the
+Jeffreys' prior distribution, \[
+E(P|x)=\frac{0.5 + 0}{0.5 + 0.5 + 25}= 0.019
+\] \emph{ii)} if \(\alpha=\beta=1\), i.e., we are considering a Uniform
+prior distribution, \[
+E(P|x)=\frac{1 + 0}{1 + 1 + 25}= 0.037
+\] \emph{iii)} if \(\alpha=\beta=10\), \[
+E(P|x)=\frac{10 + 0}{10 + 10 + 25}= 0.222
+\] It is clear that the higher the parameters of the prior Beta
+distribution, the higher the mean of the posterior distribution. This
+implies that our estimate for the population proportion will grow as the
+parameters of the prior distribution increase.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  In case we are planning to take a larger sample, we can use the
+  posterior distribution (computed using \(\alpha=\beta=1\)) obtained in
+  the survey involving just 25 people as prior distribution in the new
+  survey. This means that the prior distribution for the new survey will
+  be a Beta distribution with \(\alpha=1\) and \(\beta=26\).
+\end{enumerate}
+
+\hypertarget{ex-4.26}{%
+\subsubsection{Ex 4.26}\label{ex-4.26}}
+
+\emph{Refer to the clinical trial example in Section 4.7.5. Using the
+Jeffreys prior for} \(\pi_1\) \emph{and for} \(\pi_2\)\emph{, simulate
+and plot the posterior distribution of} \(\pi_1 -\pi_2\)\emph{. Find the
+HPD interval. What does that interval reflect about the posterior
+distribution?}
+
+\textbf{Solution}
+
+In this exercize we are considering two data coming from two
+inddependent binomial distributions with parameters namely
+\(B(\pi_1 ,n_1)\) and \(B(\pi_2,n_2)\). Under this conditions we can
+consider the Jeffreys prior distribution (the prior distribution the
+lead to a posterior distribution wich remain constant under different
+scales of measurement for the parameter of interest) as a beta
+distribution with \(\alpha=\beta=0.5\) for both \(\pi_1\) and \(\pi_2\).
+This lead us to the followign postirior distributions \[
+\begin{align*}
+g(\pi_1|y_1)\propto f(y_1|\pi_1)p(\pi_1)\propto [\pi^{y_1}(1-\pi^{n_1-y_1})][\pi^{\alpha-1}(1-\pi^{\beta-1})]\propto Beta(\pi_1;\alpha^*,\beta^*)\\
+g(\pi_2|y_2)\propto f(y_2|\pi_2)p(\pi_2)\propto [\pi^{y_2}(1-\pi^{n_2-y_2})][\pi^{\alpha-1}(1-\pi^{\beta-1})]\propto Beta(\pi_2;\alpha^*,\beta^*)\\
+\end{align*}
+\] This mean the postirior distribution for both the parametare is a
+beta distribution with \(\alpha^*=y_i+0.5\) and \(\beta^*=n_i-y_i+0.5\).
+Since in our example we have all successes out of 11 trials and 0
+successes out of 1 trial we have \(\pi_1|y_1\sim Beta(11.5,0.5)\) and
+\(\pi_2|y_2\sim Beta(0.5,1.5)\). We can then create a sample of 1000000
+elements from theese two distributions:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{N}\OtherTok{=}\DecValTok{1000000}
+\NormalTok{alpha\_p}\OtherTok{=}\FunctionTok{c}\NormalTok{(}\FloatTok{11.5}\NormalTok{,}\FloatTok{0.5}\NormalTok{)}
+\NormalTok{beta\_p}\OtherTok{=}\FunctionTok{c}\NormalTok{(}\FloatTok{0.5}\NormalTok{,}\FloatTok{1.5}\NormalTok{)}
+\NormalTok{sample\_1}\OtherTok{=}\FunctionTok{rbeta}\NormalTok{(N,alpha\_p[}\DecValTok{1}\NormalTok{],beta\_p[}\DecValTok{1}\NormalTok{])}
+\NormalTok{sample\_2}\OtherTok{=}\FunctionTok{rbeta}\NormalTok{(N,alpha\_p[}\DecValTok{2}\NormalTok{],beta\_p[}\DecValTok{2}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+Now we can evaluate the difference from the two samples and print his
+distribution and histogram:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{),}\AttributeTok{mai=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\FunctionTok{hist}\NormalTok{(sample\_1}\SpecialCharTok{{-}}\NormalTok{sample\_2)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(sample\_1}\SpecialCharTok{{-}}\NormalTok{sample\_2,),}\AttributeTok{main=}\StringTok{"density of sample\_1{-}sample\_2"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{GroupF_HW3_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+As we can see from the simulation,the posterior distribution of
+\(\pi_1-\pi_2\) is monotone and increasing\\
+between \([-1,1]\) which is the domain of \(\pi_1-\pi_2\).
+
+We can now evaluate both the posterior quantile interval and the high
+density posterior interval (using the \emph{HDInterval library} ):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(HDInterval)}
+\NormalTok{EQT}\OtherTok{=}\FunctionTok{c}\NormalTok{(}\FunctionTok{quantile}\NormalTok{(sample\_1}\SpecialCharTok{{-}}\NormalTok{sample\_2,}\AttributeTok{probs =} \FloatTok{0.025}\NormalTok{),}\FunctionTok{quantile}\NormalTok{(sample\_1}\SpecialCharTok{{-}}\NormalTok{sample\_2,}\AttributeTok{probs =} \FloatTok{0.975}\NormalTok{))}
+\NormalTok{HDI}\OtherTok{=}\FunctionTok{hdi}\NormalTok{(sample\_1}\SpecialCharTok{{-}}\NormalTok{sample\_2,}\AttributeTok{credMass =} \FloatTok{0.95}\NormalTok{)}
+\NormalTok{HDI}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##     lower     upper 
+## 0.1819722 0.9999999 
+## attr(,"credMass")
+## [1] 0.95
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{EQT}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       2.5%      97.5% 
+## 0.09962407 0.99332342
+\end{verbatim}
+
+As we can see the HDI shifts the boundaries more to the right and this
+because the posterior density is monotone increasing towards the upper
+bound.
+
+Since the density function is monotone then it's preferable not to
+exclude values closer to 1 and so it's preferable to use the HDI
+interval.
+
+\hypertarget{ex-4.62}{%
+\subsubsection{Ex 4.62}\label{ex-4.62}}
+
+\emph{For the bootstrap method, explain the similarity and difference
+between the true sampling distribution of \(\hat{\theta}\) and the
+empirically-generated bootstrap distribution in terms of its center and
+its spread.}
+
+\textbf{Solution}
+
+The bootstrap method treats th sampling distribution as if it were the
+true population distribution. The method samples \(n\) observations from
+the sample distribution. This new sample has its own estimation of the
+parameter \(\theta\). Repeating the process \(N\) times we have \(N\)
+estimates of \(\theta\): \(\hat{\theta}_1, \dots, \hat{theta}_N\). Their
+empirical distribution is called the \emph{bootstrap distribution}.\\
+The difference with the true sampling distribution is that the bootstrap
+distribution centers around \(\hat{\theta}\) instead of \(\theta\), also
+the interval of values between the 2.5 and the 97.5 percentiles of the
+estimates of \(\theta\) is a 95\% confidence interval for \(\theta\).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# example}
+
+\CommentTok{\# parameters}
+\NormalTok{mu }\OtherTok{=} \DecValTok{5}
+\NormalTok{sigma }\OtherTok{=} \DecValTok{1}
+
+\CommentTok{\# sample}
+\NormalTok{n }\OtherTok{=} \DecValTok{30}
+\NormalTok{y }\OtherTok{=} \FunctionTok{rnorm}\NormalTok{(n,mu,sigma)}
+
+\CommentTok{\# bootstrap}
+\NormalTok{N }\OtherTok{=} \DecValTok{1000}
+\NormalTok{boot.sample }\OtherTok{=} \FunctionTok{matrix}\NormalTok{(}\ConstantTok{NA}\NormalTok{, }\AttributeTok{nrow =}\NormalTok{ N, }\AttributeTok{ncol =}\NormalTok{ n)}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{N)}
+\NormalTok{\{}
+\NormalTok{  boot.sample[i,] }\OtherTok{=} \FunctionTok{sample}\NormalTok{(y,n,}\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{\}}
+\NormalTok{boot.stat }\OtherTok{=} \FunctionTok{rowMeans}\NormalTok{(boot.sample)}
+
+\FunctionTok{hist}\NormalTok{(boot.stat, }\AttributeTok{main=}\StringTok{\textquotesingle{}\textquotesingle{}}\NormalTok{,}\AttributeTok{breaks=}\DecValTok{20}\NormalTok{, }\AttributeTok{probability =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{sub =} \FunctionTok{paste}\NormalTok{(}\StringTok{"the true mean is"}\NormalTok{,mu))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{GroupF_HW3_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\hypertarget{fsds---chapter-6}{%
+\subsection{FSDS - Chapter 6}\label{fsds---chapter-6}}
+
+\hypertarget{ex.-6.10}{%
+\subsubsection{Ex. 6.10}\label{ex.-6.10}}
+
+\emph{The Students data file shows responses on variables summarized in
+Exercise 1.2.}
+
+\emph{(a) Fit the linear model using hsgpa = high school GPA, tv =
+weekly hours watching TV, and sport = weekly hours participating in
+sports as predictors of cogpa = college GPA. Report the prediction
+equation. What do the P-values suggest?}
+
+\emph{(b) Summarize the estimated effect of hsgpa.}
+
+\emph{(c) Report and interpret \(R^2\) , adjusted \(R^2\) , and the
+multiple correlation.}
+
+\textbf{Solution}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\tightlist
+\item
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{setwd}\NormalTok{(}\FunctionTok{getwd}\NormalTok{())}
+\NormalTok{data }\OtherTok{\textless{}{-}} \FunctionTok{read.table}\NormalTok{(}\StringTok{"Students.dat"}\NormalTok{, }\AttributeTok{header =}\NormalTok{ T)}
+
+\NormalTok{fit }\OtherTok{=} \FunctionTok{lm}\NormalTok{(cogpa}\SpecialCharTok{\textasciitilde{}}\NormalTok{hsgpa}\SpecialCharTok{+}\NormalTok{tv}\SpecialCharTok{+}\NormalTok{sport, }\AttributeTok{data =}\NormalTok{ data)}
+\FunctionTok{summary}\NormalTok{(fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = cogpa ~ hsgpa + tv + sport, data = data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.6748 -0.2590  0.0567  0.2773  0.7525 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)  2.815427   0.367788   7.655 2.86e-10 ***
+## hsgpa        0.208804   0.101290   2.061   0.0439 *  
+## tv           0.003336   0.006868   0.486   0.6291    
+## sport       -0.014066   0.011599  -1.213   0.2303    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3414 on 56 degrees of freedom
+## Multiple R-squared:  0.1045, Adjusted R-squared:  0.05655 
+## F-statistic: 2.179 on 3 and 56 DF,  p-value: 0.1007
+\end{verbatim}
+
+The relatively high p-values we got both in the t-tests and in the
+F-test suggest that the relation between the variables is not linear.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  However, we can notice that the p-value obtained for the hsgpa t-test
+  is an order of magnitude smaller than the others. We can therefor
+  think of a linear relation between hsgpa and cogpa.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit }\OtherTok{=} \FunctionTok{lm}\NormalTok{(cogpa}\SpecialCharTok{\textasciitilde{}}\NormalTok{hsgpa, }\AttributeTok{data =}\NormalTok{ data)}
+\FunctionTok{summary}\NormalTok{(fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = cogpa ~ hsgpa, data = data)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.63871 -0.29945  0.06973  0.26812  0.61229 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)  2.74916    0.32207   8.536 7.79e-12 ***
+## hsgpa        0.21285    0.09644   2.207   0.0313 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3405 on 58 degrees of freedom
+## Multiple R-squared:  0.07748,    Adjusted R-squared:  0.06157 
+## F-statistic: 4.871 on 1 and 58 DF,  p-value: 0.03128
+\end{verbatim}
+
+As expected, we can observe that both the t-test on the coefficient of
+hsgpa and the F-test are now below the threshold of 0.05. We can
+conclude that there is a linear relation (even if pretty weak) between
+the two variables cogpa and hsgpa.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  In the first report we can see that the value of \(R^2\) is pretty
+  low, confirming the poor quality of the fit. The value of the adjusted
+  \(R^2\) is even lower: that is because this last index is thought to
+  compensate the fact that more complex models (namely models with more
+  variables) tend to give greater values of \(R^2\). In fact we can
+  observe that in the second fit the value of \(R^2\) becomes smaller,
+  while the adjusted one gets larger.
+\end{enumerate}
+
+\hypertarget{ex-6.30}{%
+\subsubsection{Ex 6.30}\label{ex-6.30}}
+
+\emph{When the values of} \(y\) \emph{are multiplied by a constant}
+\(c\)\emph{, from their formulas, show that} \(s_y\) \emph{and}
+\(\hat{\beta_1}\) \emph{in the bivariate linear model are also then
+multiplied by} \(c\)\emph{. Thus, show that}
+\(r = \hat{\beta_1}(s_x/s_y)\) \emph{does not depend on the units of
+measurement.}
+
+\textbf{Solution}
+
+For a response variable Y, the sample standard deviation \(s_y\) and the
+least square estimate of the slope of the associated bilinear model
+\(\hat{\beta_1}\) are given by the following formulas \[
+s_y= \sqrt{\frac{\sum_{i=1}^n (y_i - \bar{y})^2}{n-1}} \ \ \ \ \ \ \ \ \ \ \hat{\beta_1}=\frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2}
+\] Given a constant \(c\), consider a new response variable \(Y^*=cY\),
+whose sample mean is \(\overline{y^*}=c\overline{y}\). Then
+
+\[
+s_{y^*}=\sqrt{\frac{\sum_{i=1}^n (y_i^* - \bar{y^*})^2}{n-1}} = 
+\sqrt{\frac{\sum_{i=1}^n (cy_i - c\bar{y})^2}{n-1}}=
+\sqrt{c^2 \frac {\sum_{i=1}^n(y_i - \bar{y})^2}{n-1}}= 
+c \ \sqrt{\frac{\sum_{i=1}^n (y_i - \bar{y})^2}{n-1}} = c s_y
+\] and \[
+\hat{\beta^*_1}=\frac{\sum_{i=1}^n (x_i - \bar{x})(y_i^* - \bar{y^*})}{\sum_{i=1}^n (x_i - \bar{x})^2}=
+\frac{\sum_{i=1}^n (x_i - \bar{x})(cy_i - c\bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2}=
+c \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2} = c \hat{\beta_1}
+\]
+
+In order to show that the correlation coefficient \(r\) is unit-free, we
+need to rewrite it as a function of two standardized variables, \(Z_x\)
+and \(Z_y\) which do not depend on any measurement unit by definition.
+Recall that \(Z_x=\frac{X - \mu_x}{\sigma_x}\), with \(\mu_z=0\) and
+\(\sigma_z=1\), and the corresponding sample estimate is
+\(z_x=\frac{x-\bar{x}}{s_x}\).
+
+\[
+r= \hat{\beta^*_1}\left(\frac{s_x}{s_{y^*}}\right)= 
+c \hat{\beta_1} \left(\frac{s_x}{cs_{y}}\right) = 
+\hat{\beta_1} \left(\frac{s_x}{s_{y}}\right) = 
+\frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2} \frac{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}{\sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}}=
+\]
+
+\[
+=\frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}\sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}} =
+\sum_{i=1}^n \left(\frac{x_i - \bar{x}}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}\right)\left(\frac{y_i - \bar{y}}{\sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}}\right)=
+\]
+
+\[
+=\frac{1}{n-1}\sum_{i=1}^n \left(\frac{x_i - \bar{x}}{s_x}\right)\left(\frac{y_i - \bar{y}}{s_y}\right)=
+\]
+
+\[ 
+=\frac{1}{n-1}\sum_{i=1}^n z_xz_y
+\]
+
+\hypertarget{ex-6.42}{%
+\subsubsection{Ex 6.42}\label{ex-6.42}}
+
+\emph{You can fit the quadratic equation}
+\(E(Y) = \beta_0+\beta_1 \cdot x+\beta_2 \cdot x^2\) \emph{by fitting a
+multiple regression model with} \(x_1 = x\) \emph{and}
+\(x_2 = x^2\)\emph{.}\\
+\((a)\) \emph{Simulate} \(100\) \emph{independent observations from the
+model} \(Y = 40.0-5.0 \cdot x+0.5\cdot x^2+\epsilon\)\emph{, where}
+\(X\) \emph{has a uniform distribution over} \(\left[0, 10\right]\)
+\emph{and} \(\epsilon \sim \mathcal{N}(0,1)\)\emph{. Plot the data and
+fit the quadratic model. Report how the fitted equation compares with
+the true relationship.}\\
+\((b)\) \emph{Find the correlation between} \(x\) \emph{and} \(y\)
+\emph{and explain why it is so weak even though the plot shows a strong
+relationship with a large} \(R^2\) \emph{value for the quadratic model.}
+
+\textbf{Solution}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\tightlist
+\item
+  Let's first create our sample:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Number of observations}
+\NormalTok{n}\OtherTok{=}\DecValTok{100}
+\CommentTok{\#Creating the sample with the uniform distribution between 0 and 10 }
+\NormalTok{x}\OtherTok{=}\FunctionTok{runif}\NormalTok{(n,}\AttributeTok{min =} \DecValTok{0}\NormalTok{,}\AttributeTok{max=}\DecValTok{10}\NormalTok{)}
+\NormalTok{x\_2}\OtherTok{=}\NormalTok{x}\SpecialCharTok{\^{}}\DecValTok{2}
+\CommentTok{\#Creating the stochastic component of the model from a standard normal distribution}
+\NormalTok{e}\OtherTok{=}\FunctionTok{rnorm}\NormalTok{(n)}
+\CommentTok{\#Evaluating y from the observations }
+\NormalTok{y}\OtherTok{=}\FloatTok{40.0}\SpecialCharTok{{-}}\NormalTok{x}\SpecialCharTok{*}\FloatTok{5.0}\SpecialCharTok{+}\NormalTok{x\_2}\SpecialCharTok{*}\FloatTok{0.5}\SpecialCharTok{+}\NormalTok{e}
+\CommentTok{\#Creating a datframe with our simulated observations }
+\NormalTok{d}\OtherTok{=}\FunctionTok{data.frame}\NormalTok{(x,x\_2,y)}
+\end{Highlighting}
+\end{Shaded}
+
+Now we can fit the linear model to our data:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lmodel}\OtherTok{=}\FunctionTok{lm}\NormalTok{(y}\SpecialCharTok{\textasciitilde{}}\NormalTok{x}\SpecialCharTok{+}\NormalTok{x\_2,}\AttributeTok{data=}\NormalTok{d)}
+\FunctionTok{summary}\NormalTok{(lmodel)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = y ~ x + x_2, data = d)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2.85632 -0.68278 -0.04968  0.62284  2.45432 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 40.21349    0.34209  117.55   <2e-16 ***
+## x           -5.09493    0.16171  -31.51   <2e-16 ***
+## x_2          0.50836    0.01595   31.86   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.065 on 97 degrees of freedom
+## Multiple R-squared:  0.9133, Adjusted R-squared:  0.9115 
+## F-statistic: 510.6 on 2 and 97 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+As we can see the F-statistic and the t statistic for each parameter
+have all very small p-values \((\sim10^{-6})\) confirming the general
+significance of the model and the significance of the variables in the
+model.
+
+We can also analize the residuals with the following plots:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(x,lmodel}\SpecialCharTok{$}\NormalTok{residuals,}\AttributeTok{ylab =} \StringTok{"residual"}\NormalTok{)}
+\FunctionTok{abline}\NormalTok{(}\AttributeTok{h=}\DecValTok{0}\NormalTok{, }\AttributeTok{lty=}\StringTok{"dashed"}\NormalTok{,}\AttributeTok{col=}\StringTok{"red"}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(x\_2,lmodel}\SpecialCharTok{$}\NormalTok{residuals,}\AttributeTok{ylab =} \StringTok{"residual"}\NormalTok{)}
+\FunctionTok{abline}\NormalTok{(}\AttributeTok{h=}\DecValTok{0}\NormalTok{, }\AttributeTok{lty=}\StringTok{"dashed"}\NormalTok{,}\AttributeTok{col=}\StringTok{"red"}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(lmodel}\SpecialCharTok{$}\NormalTok{fitted.values,lmodel}\SpecialCharTok{$}\NormalTok{residuals,}\AttributeTok{xlab =} \StringTok{"fitted value"}\NormalTok{,}\AttributeTok{ylab =} \StringTok{"residual"}\NormalTok{)}
+\FunctionTok{abline}\NormalTok{(}\AttributeTok{h=}\DecValTok{0}\NormalTok{, }\AttributeTok{lty=}\StringTok{"dashed"}\NormalTok{,}\AttributeTok{col=}\StringTok{"red"}\NormalTok{)}
+\FunctionTok{qqnorm}\NormalTok{(lmodel}\SpecialCharTok{$}\NormalTok{residuals)}
+\FunctionTok{abline}\NormalTok{(}\AttributeTok{coef =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{), }\AttributeTok{lty=}\StringTok{"dashed"}\NormalTok{,}\AttributeTok{col=}\StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{GroupF_HW3_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+From these plots we can affirm that the residual are independent from
+the variables and from the predicted value as they are scattered at
+random around 0. In addition we can also say that they follow a normal
+distribution as we expected since we have generated the stocastich part
+from a normal distribution \(N(0,1)\).
+
+At the end we can also plot the data and the model prediction and see
+how they overlap:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#prediction }
+\NormalTok{pred}\OtherTok{=}\ControlFlowTok{function}\NormalTok{ (x)\{}
+\NormalTok{  p}\OtherTok{=}\NormalTok{lmodel}\SpecialCharTok{$}\NormalTok{coefficients[}\DecValTok{1}\NormalTok{]}\SpecialCharTok{+}\NormalTok{lmodel}\SpecialCharTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{]}\SpecialCharTok{*}\NormalTok{x}\SpecialCharTok{+}\NormalTok{lmodel}\SpecialCharTok{$}\NormalTok{coefficients[}\DecValTok{3}\NormalTok{]}\SpecialCharTok{*}\NormalTok{x}\SpecialCharTok{\^{}}\DecValTok{2}
+\NormalTok{\}}
+\CommentTok{\#Plots}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(x,y)}
+\FunctionTok{curve}\NormalTok{(}\FunctionTok{pred}\NormalTok{(x),}\AttributeTok{col=}\StringTok{"red"}\NormalTok{,}\AttributeTok{add=}\NormalTok{T)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{GroupF_HW3_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  In order to evaluate the correlation between x and y we can use the
+  correlation index \[
+  r=\frac{s_{x,y}}{s_xs_y}=\frac{\sum_{i=1}^n(x_i-\bar{x})(y_i-\bar{y})}{\sqrt{[\sum_{i=1}^n(x_i-\bar{x})^2][\sum_{i=1}^n](y_i-\bar{y})^2]}}
+  \] This index has a value between -1 and 1 and when \(|r|=1\) it means
+  that the two variables are totally \emph{linear} correlated. Therfore
+  this index is a measue of linear correlation but since here y and x
+  are not linearly correlated we expect that \(|r|<1\). Instead if we
+  take into consideration the adjusted \(R^2\) index of the model, it
+  represent how the model can represent the variability of the y and
+  since our model is not linear in x we expect that \(R^2>|r|\).
+\end{enumerate}
+
+We can now evaluate these indexes for our data and model:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(lmodel)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = y ~ x + x_2, data = d)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2.85632 -0.68278 -0.04968  0.62284  2.45432 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 40.21349    0.34209  117.55   <2e-16 ***
+## x           -5.09493    0.16171  -31.51   <2e-16 ***
+## x_2          0.50836    0.01595   31.86   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.065 on 97 degrees of freedom
+## Multiple R-squared:  0.9133, Adjusted R-squared:  0.9115 
+## F-statistic: 510.6 on 2 and 97 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Sample standard errors }
+\NormalTok{sx}\OtherTok{=}\FunctionTok{sqrt}\NormalTok{(}\FunctionTok{var}\NormalTok{(x))}
+\NormalTok{sy}\OtherTok{=}\FunctionTok{sqrt}\NormalTok{(}\FunctionTok{var}\NormalTok{(y))}
+\CommentTok{\#Sample covariance}
+\NormalTok{sxy}\OtherTok{=}\FunctionTok{cov}\NormalTok{(x,y)}
+\CommentTok{\#Index of correlation }
+\NormalTok{r}\OtherTok{=}\NormalTok{sxy}\SpecialCharTok{/}\NormalTok{(sx}\SpecialCharTok{*}\NormalTok{sy)}
+\FunctionTok{abs}\NormalTok{(r)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.07301875
+\end{verbatim}
+
+As expected we can see that \(|r|<R^2\).
+
+\hypertarget{ex-6.52}{%
+\subsubsection{Ex 6.52}\label{ex-6.52}}
+
+\emph{\(F\) statistics have alternate expressions in terms of \(R^2\)
+values.}
+
+\begin{itemize}
+\item
+  \emph{(a) Show that for testing
+  \(H_0: \beta_1 = \dots = \beta_p = 0\),}\\
+  \[F = \frac{(TSS-SSE)/p}{SSE/[n-(p+1)]} \textit{ is equivalently } \frac{R^2/p}{(1-R^2)/[n-(p+1)]}\]\\
+  \emph{Explain why larger values of \(R^2\) yield larger values of
+  \(F\).}
+\item
+  \emph{(b) Show that for comparing nested linear models,}
+  \[ F = \frac{(SSE_0-SSE_1)/(p_1-p_0)}{SSE_1/[n-(p_1+1)]} = \frac{(R_1^2 - R_0^2)/(p_1-p_0)}{(1-R_1^2)/[n-(p_1+1)]}\]
+\end{itemize}
+
+\textbf{Solution}
+
+\begin{itemize}
+\item
+  \emph{(a)} Recall that
+  \(TSS = \sum_{i=1}^n (y_i - \bar{y})^2 = SSR + SSE\) where
+  \(SSE = \sum_{i=1}^n (y_i - \hat{y})^2\) and
+  \(SSR = \sum_{i=1}^n (\hat{y}_i - \bar{y})^2\). And
+  \[R^2 = \frac{SSR}{TSS} = \frac{TSS-SSE}{TSS} = \frac{\sum_{i=1}^n (y_i - \bar{y})^2 - \sum_{i=1}^n (y_i - \hat{y})^2}{\sum_{i=1}^n (y_i - \bar{y})^2}\]
+  So we can write \[
+  \frac{R^2/p}{(1-R^2)/[n-(p+1)]}
+  =
+  \frac{\frac{TSS-SSE}{TSS}/p}{(1-\frac{TSS-SSE}{TSS})/[n-(p+1)]}
+  \] \[
+  =
+  \frac{\frac{TSS-SSE}{TSS}/p}{\frac{TSS-SSE-TSS}{TSS}/[n-(p+1)]}
+  =
+  \frac{(TSS-SSE)/p}{SSE/[n-(p+1)]}
+  = F
+  \] Next, \(F=F(R^2)\) is positively monotone, since \[
+  \frac{d}{dR^2} F
+  =
+  \frac{d}{dR^2} \frac{R^2/p}{(1-R^2)/[n-(p+1)]}
+  =
+  \frac{p}{n-(p+1)} \frac{d}{dR^2} \frac{R^2}{1-R^2}
+  =
+  \frac{p}{n-(p+1)} \frac{1}{(1-R^2)^2}
+  \geq 0
+  \]
+\item
+  \emph{(b)} As above \[
+  \frac{(R_1^2 - R_0^2)/(p_1-p_0)}{(1-R_1^2)/[n-(p_1+1)]}
+  =
+  \frac{\left( \frac{TSS_1-SSE_1}{TSS_1} - \frac{TSS_0-SSE_0}{TSS_0} \right) / (p_1-p_0)}{\left( 1-\frac{TSS_1-SSE_1}{TSS_1} \right)/[n-(p_1+1)]}
+  =
+  \frac{\left( \frac{SSE_0 TSS_1 - SSE_1 TSS_0}{TSS_0 TSS_1} \right)/(p_1-p_0)}{\left( \frac{TSS_1 - TSS_1 + SSE_1}{TSS_1} \right)/[n-(p_1+1)]}
+  \] And, since the total sum on squares doesn't depend on \(p\),
+  \(TSS_0=TSS_1=TSS\), it follows \[
+  \frac{(R_1^2 - R_0^2)/(p_1-p_0)}{(1-R_1^2)/[n-(p_1+1)]}
+  =
+  \frac{\left( \frac{TSS(SSE_0-SSE_1)}{TSS^2} \right)/(p_1-p_0)}{\left( \frac{SSE_1}{TSS} \right)/[n-(p_1+1)]}
+  =
+  \frac{(SSE_0-SSE_1)/(p_1-p_0)}{SSE_1/[n-(p_1+1)]}
+  = F
+  \]
+\end{itemize}
+
+\hypertarget{lab}{%
+\subsection{LAB}\label{lab}}
+
+\emph{Suppose you receive \(n=15\) phone calls in a day, and you want to
+build a model to assess their average length. Your likelihood for each
+call length is \(y_i\sim Exponential\left(\lambda\right)\). Now, you
+have to choose the prior \(\pi\left(\lambda\right)\). Please, tell which
+of these priors is adequate to describe the problem, and provide a short
+motivation for each of them:}
+
+\emph{1. \(\pi\left(\lambda\right) = Beta\left(4,2\right)\);}
+
+\emph{2. \(\pi\left(\lambda\right) = Normal\left(1,2\right)\);}
+
+\emph{3. \(\pi\left(\lambda\right) = Gamma\left(4,2\right)\);}
+
+\emph{Now, compute your posterior as
+\(\pi\left(\lambda|y\right)\propto L\left(\lambda;y\right)\pi\left(\lambda\right)\)
+for the selected prior. If your first choice was correct, you will be
+able to compute it analytically.}
+
+\textbf{Solution}
+
+First we plot the three distributions:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{curve}\NormalTok{(}\FunctionTok{dbeta}\NormalTok{(x, }\DecValTok{4}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{GroupF_HW3_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{curve}\NormalTok{(}\FunctionTok{dnorm}\NormalTok{(x, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{xlim =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{9}\NormalTok{, }\DecValTok{10}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{GroupF_HW3_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{curve}\NormalTok{(}\FunctionTok{dgamma}\NormalTok{(x, }\DecValTok{4}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{xlim =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{GroupF_HW3_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+First of all we exclude the normal distribution, since it takes on also
+negative values. Then, supposed that I receive 15 calls in a day, it is
+likely that most of them are just quick calls to exchange few
+information, and just a small part of them result in a long
+conversation. Therefor a right-skewed distribution will better describe
+the situation, and the gamma will be the best choice.
+
+The likelihood is \(\lambda^{15}e^{-15\bar{y}\lambda}\). We can compute
+analytically the posterior, obtaining (neglecting the numeric
+constants): \[
+\pi\left(\lambda|y\right) \propto \lambda^{18}e^{-\left(2+15\bar{y}\right)\lambda},
+\] which is a gamma distribution with \(\alpha=19\) and
+\(\beta=2+15\bar{y}\).
+
+\end{document}
